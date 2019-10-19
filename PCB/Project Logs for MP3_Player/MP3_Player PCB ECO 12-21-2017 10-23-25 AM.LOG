@@ -1,0 +1,16 @@
+Removed Pin From Net: NetName=NetR40_2 Pin=U8-11
+Removed Pin From Net: NetName=NetR40_2 Pin=U8-12
+Removed Pin From Net: NetName=NetR40_2 Pin=U8-25
+Added Component: Designator=R48(0603PKG)
+Added Component: Designator=R49(0603PKG)
+Added Pin To Net: NetName=GND Pin=R48-1
+Added Pin To Net: NetName=GND Pin=R49-1
+Added Pin To Net: NetName=NetR48_2 Pin=R48-2
+Added Pin To Net: NetName=NetR48_2 Pin=U8-25
+Added Net: Name=NetR48_2
+Added Pin To Net: NetName=NetR49_2 Pin=R49-2
+Added Pin To Net: NetName=NetR49_2 Pin=U8-11
+Added Pin To Net: NetName=NetR49_2 Pin=U8-12
+Added Net: Name=NetR49_2
+Added Member To Class: ClassName=VS1063 Member=Component R48 Res1
+Added Member To Class: ClassName=VS1063 Member=Component R49 Res1

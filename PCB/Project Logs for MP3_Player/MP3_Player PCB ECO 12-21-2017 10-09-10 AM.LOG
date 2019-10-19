@@ -1,0 +1,5 @@
+Removed Pin From Net: NetName=GND Pin=D2-2
+Removed Pin From Net: NetName=GPIO0 Pin=R48-2
+Removed Member From Class: ClassName=VS1063 Member=D2
+Removed Member From Class: ClassName=VS1063 Member=R48
+Change Net Name : Old Net Name=GPIO0 New Net Name=NetR40_2

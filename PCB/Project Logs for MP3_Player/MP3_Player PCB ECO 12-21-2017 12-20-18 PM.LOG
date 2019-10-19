@@ -1,0 +1,4 @@
+Removed Pin From Net: NetName=VCC_3V3_BAT Pin=C72-2
+Removed Pin From Net: NetName=VCC_3V3_BAT Pin=C73-2
+Added Pin To Net: NetName=VCC_BAT Pin=C72-2
+Added Pin To Net: NetName=VCC_BAT Pin=C73-2

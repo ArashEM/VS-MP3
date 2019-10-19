@@ -1,0 +1,15 @@
+Added Component: Designator=P1(XH_3Pin_RA)
+Added Component: Designator=P3(XH_4Pin_RA)
+Added Component: Designator=P4(XH_2Pin_RA)
+Added Pin To Net: NetName=VS_TX Pin=P1-1
+Added Pin To Net: NetName=VS_RX Pin=P1-2
+Added Pin To Net: NetName=GND Pin=P1-3
+Added Pin To Net: NetName=NetP3_1 Pin=P3-1
+Added Pin To Net: NetName=SWDIO Pin=P3-2
+Added Pin To Net: NetName=SWCLK Pin=P3-3
+Added Pin To Net: NetName=GND Pin=P3-4
+Added Pin To Net: NetName=VCC_BAT Pin=P4-1
+Added Pin To Net: NetName=GND Pin=P4-2
+Added Member To Class: ClassName=Interfaces Member=Component P1 VS_UART
+Added Member To Class: ClassName=Interfaces Member=Component P3 SWI
+Added Member To Class: ClassName=Power Member=Component P4 Header 2

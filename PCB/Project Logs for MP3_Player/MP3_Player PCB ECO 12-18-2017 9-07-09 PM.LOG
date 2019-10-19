@@ -1,0 +1,4 @@
+Removed Pin From Net: NetName=VBUS Pin=U9-61
+Removed Pin From Net: NetName=REG_SYNC Pin=U9-62
+Added Pin To Net: NetName=REG_SYNC Pin=U9-61
+Added Pin To Net: NetName=VBUS Pin=U9-62

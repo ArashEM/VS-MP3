@@ -1,0 +1,8 @@
+Added Component: Designator=C74(C0805)
+Added Component: Designator=C75(C0805)
+Added Pin To Net: NetName=GND Pin=C74-1
+Added Pin To Net: NetName=VCC_3V3 Pin=C74-2
+Added Pin To Net: NetName=GND Pin=C75-1
+Added Pin To Net: NetName=VCC_3V3 Pin=C75-2
+Added Member To Class: ClassName=VS1063 Member=Component C74 Cap Semi
+Added Member To Class: ClassName=VS1063 Member=Component C75 Cap Semi

@@ -1,0 +1,6 @@
+Removed Pin From Net: NetName=KEY3 Pin=U9-30
+Removed Pin From Net: NetName=VBUS Pin=U9-33
+Removed Pin From Net: NetName=SPI2_NCS0 Pin=U9-37
+Removed Pin From Net: NetName=SPI2_NCS1 Pin=U9-38
+Added Pin To Net: NetName=SPI2_NCS1 Pin=U9-30
+Added Pin To Net: NetName=SPI2_NCS0 Pin=U9-33

@@ -1,0 +1,4 @@
+Removed Pin From Net: NetName=HDR_IO1 Pin=U9-50
+Removed Pin From Net: NetName=HDR_IO2 Pin=U9-57
+Added Pin To Net: NetName=HDR_IO1 Pin=U9-37
+Added Pin To Net: NetName=HDR_IO2 Pin=U9-38

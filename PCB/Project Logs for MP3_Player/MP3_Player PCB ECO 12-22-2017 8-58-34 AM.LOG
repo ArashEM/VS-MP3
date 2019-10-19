@@ -1,0 +1,3 @@
+Added Component: Designator=TP8(TP_15)
+Added Pin To Net: NetName=GND Pin=TP8-1
+Added Member To Class: ClassName=µC Member=Component TP8 TP

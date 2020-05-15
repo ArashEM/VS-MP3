@@ -29,6 +29,7 @@
 #include "vs10xx.h"
 #include "spi.h"
 #include <stdio.h>
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +49,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+FATFS 		SDFatFs;  /* File system object for SD card logical drive */
+FIL 			MyFile;     /* File object */
+char 			mSDPath[4]; /* SD card logical drive path */
+uint8_t		rd_data[32];
+FRESULT		result;
+uint32_t 	bytesread;   
+DIR dir;
+static FILINFO fno;
 /* USER CODE END Variables */
 osThreadId mp3p_taskHandle;
 uint32_t mp3p_taskBuffer[ 128 ];
@@ -141,19 +149,89 @@ void MX_FREERTOS_Init(void) {
 void mp3p_task_fn(void const * argument)
 {
   /* USER CODE BEGIN mp3p_task_fn */
+	
+	
+	/* setup vs1063 */
 	vs_setup(&hspi1);
 	vs_set_volume(&hspi1, 0x30, 0x30);
+	
+	/* increasing SPI clock rate */
+	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+	if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
 	
 	printf("VS mode register: %#06x\r\n", vs_read_register(&hspi1, SCI_MODE));
 	printf("VS status register: %#06x\r\n", vs_read_register(&hspi1, SCI_STATUS));
 	printf("VS chip ID: %#06x%04x\r\n",vs_read_wramaddr(&hspi1, chipID_H),vs_read_wramaddr(&hspi1, chipID_L));
 	printf("VS chip VER: %#06x\r\n",vs_read_wramaddr(&hspi1, Version));
 	
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	if(f_mount(&SDFatFs, (TCHAR const*)mSDPath, 0) != FR_OK)
+      Error_Handler();		/* FatFs Initialization Error */
+		
+		
+		result = f_opendir(&dir, (char *)"/");
+		if(result != FR_OK)
+			Error_Handler();
+
+		vs_ear_speaker(&hspi1, 0x01);
+		vs_deselect_control();
+		vs_select_data();
+		
+		for(;;)
+		{
+			result = f_readdir(&dir, &fno);                   /* Read a directory item */
+				if (result != FR_OK || fno.fname[0] == 0) 
+					Error_Handler();  							/* Break on error or end of dir */
+				if (fno.fattrib & AM_DIR)
+					continue;
+			
+			result = f_open(&MyFile, fno.fname, FA_READ) ;
+			if(result != FR_OK)
+			{
+					printf("f_open: %d\r\n",result);
+					continue;
+			}
+			
+			printf("playing file: %s\r\n",fno.fname);
+			
+			for(;;)
+			{
+				result = f_read(&MyFile, (void *)rd_data, sizeof(rd_data), &bytesread);
+				if(result != FR_OK)
+				{
+					Error_Handler();
+					f_close(&MyFile);
+					break;
+				}
+				else if(bytesread < sizeof(rd_data) )
+				{
+					printf("End of file: %s\r\n", fno.fname);
+					
+					//vs_wait();
+					if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET)
+					{
+						osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
+					}
+					HAL_SPI_Transmit(&hspi1, rd_data, bytesread , 0xFFFF);
+					
+					f_close(&MyFile);
+					break;
+				}
+				else
+				{
+					//vs_wait();
+					if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET)
+					{
+						osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
+					}
+					HAL_SPI_Transmit(&hspi1, rd_data, sizeof(rd_data), 0xFFFF);
+				}
+				
+			}
+			
+		}	
   /* USER CODE END mp3p_task_fn */
 }
 

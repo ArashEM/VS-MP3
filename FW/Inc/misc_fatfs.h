@@ -8,5 +8,5 @@ FRESULT scan_files (
     char* path        /* Start node to be scanned (***also used as work area***) */
 );
 
-#endif	/* _MISC_FATFS_H_ */
+#endif	/* _MISC_FATFS_H_ */		
 		

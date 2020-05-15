@@ -37,6 +37,8 @@
 #include "misc_fatfs.h"
 #include <string.h>
 #include <stdio.h>
+#include "ili9340.h"
+//#include "WM.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -110,7 +112,13 @@ int main(void)
   MX_FATFS_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
-	printf("End of init\r\n");
+	/* Wait for LCD to startup */
+	HAL_Delay(2000);
+	/* Init the STemWin GUI Library */
+  GUI_Init();
+	/* Activate the use of memory device feature */
+  // WM_SetCreateFlags(WM_CF_MEMDEV);
+	MainTask();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

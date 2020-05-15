@@ -30,6 +30,7 @@
 #include "spi.h"
 #include <stdio.h>
 #include "fatfs.h"
+//#include "GUI.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -272,10 +273,18 @@ void blink_task_fn(void const * argument)
 void emwin_task_fn(void const * argument)
 {
   /* USER CODE BEGIN emwin_task_fn */
+	int i = 0;
+	int xPos, yPos;
+	xPos = LCD_GetXSize() / 2;
+	yPos = LCD_GetYSize() / 3;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		GUI_DispStringHCenterAt(fno.fname, xPos, yPos+50);
+		GUI_DispDecAt( i++, 20,200,4);
+			if (i > 9999) 
+					i = 0;
+    osDelay(100);
   }
   /* USER CODE END emwin_task_fn */
 }

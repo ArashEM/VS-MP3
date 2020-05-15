@@ -52,11 +52,14 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, LED_Pin|HDR_IO1_Pin|PWR_EXT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, xCS_Pin|xDCS_Pin|LCD_RSTN_Pin|HDR_IO2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, xCS_Pin|xDCS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, xRST_Pin|LCD_DCX_Pin|TP_CS_Pin|LCD_CS_Pin 
                           |REG_SYNC_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, LCD_RSTN_Pin|HDR_IO2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = CHG_Pin;

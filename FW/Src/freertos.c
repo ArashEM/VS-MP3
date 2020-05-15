@@ -26,7 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-
+#include "vs10xx.h"
+#include "spi.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,6 +141,14 @@ void MX_FREERTOS_Init(void) {
 void mp3p_task_fn(void const * argument)
 {
   /* USER CODE BEGIN mp3p_task_fn */
+	vs_setup(&hspi1);
+	vs_set_volume(&hspi1, 0x30, 0x30);
+	
+	printf("VS mode register: %#06x\r\n", vs_read_register(&hspi1, SCI_MODE));
+	printf("VS status register: %#06x\r\n", vs_read_register(&hspi1, SCI_STATUS));
+	printf("VS chip ID: %#06x%04x\r\n",vs_read_wramaddr(&hspi1, chipID_H),vs_read_wramaddr(&hspi1, chipID_L));
+	printf("VS chip VER: %#06x\r\n",vs_read_wramaddr(&hspi1, Version));
+	
   /* Infinite loop */
   for(;;)
   {

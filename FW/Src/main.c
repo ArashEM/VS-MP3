@@ -36,6 +36,7 @@
 #include "vs10xx.h"
 #include "misc_fatfs.h"
 #include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -109,7 +110,7 @@ int main(void)
   MX_FATFS_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
-
+	printf("End of init\r\n");
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

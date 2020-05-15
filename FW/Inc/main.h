@@ -81,6 +81,7 @@ void Error_Handler(void);
 #define xDCS_GPIO_Port GPIOC
 #define DREQ_Pin GPIO_PIN_0
 #define DREQ_GPIO_Port GPIOB
+#define DREQ_EXTI_IRQn EXTI0_IRQn
 #define xRST_Pin GPIO_PIN_1
 #define xRST_GPIO_Port GPIOB
 #define LCD_DCX_Pin GPIO_PIN_10

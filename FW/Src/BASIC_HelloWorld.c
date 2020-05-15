@@ -32,10 +32,13 @@ Purpose     : Simple demo drawing "Hello world"
 *
 *       MainTask
 */
-void MainTask(void) {
+void show_banner(void) {
+	int xPos, yPos;
   GUI_Clear();
   GUI_SetFont(&GUI_Font32_ASCII);
-  GUI_DispStringAt("Hello world!", (LCD_GetXSize()-100)/2, (LCD_GetYSize()-20)/2);
+	xPos = LCD_GetXSize() / 2;
+	yPos = LCD_GetYSize() / 3;
+	GUI_DispStringHCenterAt("VS-MP3 player", xPos, yPos);
 }
 
 /*************************** End of file ****************************/

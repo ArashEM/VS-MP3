@@ -64,6 +64,9 @@ osStaticThreadDef_t mp3p_taskControlBlock;
 osThreadId blink_taskHandle;
 uint32_t blink_TaskBuffer[ 128 ];
 osStaticThreadDef_t blink_TaskControlBlock;
+osThreadId emwin_taskHandle;
+uint32_t emwind_taskBuffer[ 128 ];
+osStaticThreadDef_t emwind_taskControlBlock;
 osSemaphoreId vs10xx_dreq_semHandle;
 osStaticSemaphoreDef_t vs10xx_dreq_sem_cb;
 
@@ -74,6 +77,7 @@ osStaticSemaphoreDef_t vs10xx_dreq_sem_cb;
 
 void mp3p_task_fn(void const * argument);
 void blink_task_fn(void const * argument);
+void emwin_task_fn(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -132,6 +136,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of blink_task */
   osThreadStaticDef(blink_task, blink_task_fn, osPriorityBelowNormal, 0, 128, blink_TaskBuffer, &blink_TaskControlBlock);
   blink_taskHandle = osThreadCreate(osThread(blink_task), NULL);
+
+  /* definition and creation of emwin_task */
+  osThreadStaticDef(emwin_task, emwin_task_fn, osPriorityBelowNormal, 0, 128, emwind_taskBuffer, &emwind_taskControlBlock);
+  emwin_taskHandle = osThreadCreate(osThread(emwin_task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -252,6 +260,24 @@ void blink_task_fn(void const * argument)
 		osDelay(500);
   }
   /* USER CODE END blink_task_fn */
+}
+
+/* USER CODE BEGIN Header_emwin_task_fn */
+/**
+* @brief Function implementing the emwin_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_emwin_task_fn */
+void emwin_task_fn(void const * argument)
+{
+  /* USER CODE BEGIN emwin_task_fn */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END emwin_task_fn */
 }
 
 /* Private application code --------------------------------------------------*/

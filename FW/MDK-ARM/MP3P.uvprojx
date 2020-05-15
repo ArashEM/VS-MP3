@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FatFs/src/drivers;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Middlewares/Third_Party/FatFs/src;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;..\Middlewares\Third_Party\STemWin</IncludePath>
+              <IncludePath>../Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src/drivers; ../Drivers/CMSIS/Device/ST/STM32F1xx/Include; ../Middlewares/Third_Party/FatFs/src; ../Drivers/CMSIS/Include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ..\Middlewares\Third_Party\STemWin</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -542,39 +542,36 @@
           <GroupName>Middlewares/STemWin</GroupName>
           <Files>
             <File>
-              <FileName>BASIC_HelloWorld.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\BASIC_HelloWorld.c</FilePath>
-            </File>
-            <File>
-              <FileName>GUI_X.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\GUI_X.c</FilePath>
-            </File>
-            <File>
-              <FileName>GUIConf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\GUIConf.c</FilePath>
-            </File>
-            <File>
-              <FileName>ili9340.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\ili9340.c</FilePath>
-            </File>
-            <File>
-              <FileName>LCDConf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\LCDConf.c</FilePath>
-            </File>
-            <File>
               <FileName>STemWin_CM3_wc16.a</FileName>
               <FileType>4</FileType>
               <FilePath>..\Middlewares\Third_Party\STemWin\STemWin_CM3_wc16.a</FilePath>
             </File>
+            <File>
+              <FileName>BASIC_HelloWorld.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\BASIC_HelloWorld.c</FilePath>
+            </File>
+            <File>
+              <FileName>GUI_X.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GUI_X.c</FilePath>
+            </File>
+            <File>
+              <FileName>GUIConf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GUIConf.c</FilePath>
+            </File>
+            <File>
+              <FileName>ili9340.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ili9340.c</FilePath>
+            </File>
+            <File>
+              <FileName>LCDConf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\LCDConf.c</FilePath>
+            </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>
           <GroupName>Drivers/STM32F1xx_HAL_Driver</GroupName>
@@ -780,6 +777,9 @@
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3/port.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>

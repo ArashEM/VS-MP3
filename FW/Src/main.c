@@ -118,7 +118,7 @@ int main(void)
   GUI_Init();
 	/* Activate the use of memory device feature */
   // WM_SetCreateFlags(WM_CF_MEMDEV);
-	MainTask();
+	show_banner();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

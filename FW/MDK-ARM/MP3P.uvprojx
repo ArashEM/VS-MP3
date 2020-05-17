@@ -51,7 +51,7 @@
           <OutputName>MP3P</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath></ListingPath>
@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src/drivers; ../Drivers/CMSIS/Device/ST/STM32F1xx/Include; ../Middlewares/Third_Party/FatFs/src; ../Drivers/CMSIS/Include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ..\Middlewares\Third_Party\STemWin</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FatFs/src/drivers;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Middlewares/Third_Party/FatFs/src;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/STemWin/inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -542,11 +542,6 @@
           <GroupName>Middlewares/STemWin</GroupName>
           <Files>
             <File>
-              <FileName>STemWin_CM3_wc16.a</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\Middlewares\Third_Party\STemWin\STemWin_CM3_wc16.a</FilePath>
-            </File>
-            <File>
               <FileName>BASIC_HelloWorld.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\BASIC_HelloWorld.c</FilePath>
@@ -570,6 +565,11 @@
               <FileName>LCDConf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\LCDConf.c</FilePath>
+            </File>
+            <File>
+              <FileName>libSTemWin_CM3_wc16.a</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\Middlewares\Third_Party\STemWin\libSTemWin_CM3_wc16.a</FilePath>
             </File>
           </Files>
         </Group>

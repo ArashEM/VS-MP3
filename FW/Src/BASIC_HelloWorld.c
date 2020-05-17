@@ -21,6 +21,7 @@ Purpose     : Simple demo drawing "Hello world"
 */
 
 #include "GUI.h"
+#include <stdio.h>
 
 /*********************************************************************
 *
@@ -34,11 +35,18 @@ Purpose     : Simple demo drawing "Hello world"
 */
 void show_banner(void) {
 	int xPos, yPos;
+	char message[30];
+	
+	
   GUI_Clear();
-  GUI_SetFont(&GUI_Font32_ASCII);
 	xPos = LCD_GetXSize() / 2;
+	yPos = LCD_GetYSize() / 5;
+  GUI_SetFont(&GUI_Font24_ASCII);
+	GUI_DispStringHCenterAt("VS-MP3 player ...", xPos, yPos);
+	
+	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
 	yPos = LCD_GetYSize() / 3;
-	GUI_DispStringHCenterAt("VS-MP3 player", xPos, yPos);
+	GUI_DispStringHCenterAt(message, xPos, yPos);
 }
 
 /*************************** End of file ****************************/

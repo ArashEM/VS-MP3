@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/ArashEM/VS-MP3.svg?branch=master)](https://travis-ci.com/ArashEM/VS-MP3)
+
 # Introduction
 
 `VS1063` is an audio encoder/decoder from [VLSI solution](http://www.vlsi.fi/en/home.html). Base on VS1063 and STM32F1X, I'd designed a simple MP3 player. 

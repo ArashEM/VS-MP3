@@ -1,0 +1,11 @@
+language: c
+script:
+  - cd FW/
+  - make 
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+    packages:
+    - gcc-arm-embedded

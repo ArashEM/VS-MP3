@@ -1,12 +1,12 @@
 /**
  ******************************************************************************
   * @file    bsp_driver_sd.h for F1 (based on stm3210e_eval_sd.h)
-  * @brief   This file contains the common defines and functions prototypes for 
+  * @brief   This file contains the common defines and functions prototypes for
   *          the bsp_driver_sd.c driver.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -23,28 +23,28 @@
 
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 #include "fatfs_platform.h"
 
-/* Exported types --------------------------------------------------------*/ 
-/** 
-  * @brief SD Card information structure 
+/* Exported types --------------------------------------------------------*/
+/**
+  * @brief SD Card information structure
   */
 #define BSP_SD_CardInfo HAL_SD_CardInfoTypeDef
 
-/* Exported constants --------------------------------------------------------*/ 
+/* Exported constants --------------------------------------------------------*/
 /**
-  * @brief  SD status structure definition  
-  */     
+  * @brief  SD status structure definition
+  */
 #define   MSD_OK                        ((uint8_t)0x00)
 #define   MSD_ERROR                     ((uint8_t)0x01)
 
-/** 
-  * @brief  SD transfer state definition  
-  */     
+/**
+  * @brief  SD transfer state definition
+  */
 #define   SD_TRANSFER_OK                ((uint8_t)0x00)
 #define   SD_TRANSFER_BUSY              ((uint8_t)0x01)
 
@@ -56,7 +56,7 @@
 /* kept to avoid issue when migrating old projects. */
 /* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */ 
+/* USER CODE END 0 */
 #else
 /* USER CODE BEGIN BSP_H_CODE */
 /* Exported functions --------------------------------------------------------*/   
@@ -83,7 +83,7 @@ void    BSP_SD_WriteCpltCallback(void);
 void    BSP_SD_ReadCpltCallback(void);
 /* USER CODE END BSP_H_CODE */
 #endif
-   
+
 #ifdef __cplusplus
 }
 #endif

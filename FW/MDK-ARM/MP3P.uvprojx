@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FatFs/src/drivers;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Middlewares/Third_Party/FatFs/src;../Drivers/CMSIS/Include;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/STemWin/inc</IncludePath>
+              <IncludePath>../Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc; ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src/drivers; ../Drivers/CMSIS/Device/ST/STM32F1xx/Include; ../Middlewares/Third_Party/FatFs/src; ../Drivers/CMSIS/Include; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ../Middlewares/Third_Party/STemWin/inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -447,6 +447,11 @@
               <FilePath>../Src/gpio.c</FilePath>
             </File>
             <File>
+              <FileName>freertos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/freertos.c</FilePath>
+            </File>
+            <File>
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/adc.c</FilePath>
@@ -475,11 +480,6 @@
               <FileName>fatfs_platform.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/fatfs_platform.c</FilePath>
-            </File>
-            <File>
-              <FileName>freertos.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/freertos.c</FilePath>
             </File>
             <File>
               <FileName>i2c.c</FileName>

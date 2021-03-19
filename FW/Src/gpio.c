@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * File Name          : gpio.c
-  * Description        : This file provides code for the configuration
-  *                      of all used GPIO pins.
+  * @file    gpio.c
+  * @brief   This file provides code for the configuration
+  *          of all used GPIO pins.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
+
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -30,9 +31,9 @@
 
 /* USER CODE END 1 */
 
-/** Configure pins as 
-        * Analog 
-        * Input 
+/** Configure pins as
+        * Analog
+        * Input
         * Output
         * EVENT_OUT
         * EXTI
@@ -55,7 +56,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, xCS_Pin|xDCS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, xRST_Pin|LCD_DCX_Pin|TP_CS_Pin|LCD_CS_Pin 
+  HAL_GPIO_WritePin(GPIOB, xRST_Pin|LCD_DCX_Pin|TP_CS_Pin|LCD_CS_Pin
                           |REG_SYNC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -99,9 +100,9 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(DREQ_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PBPin PBPin PBPin PBPin 
+  /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin */
-  GPIO_InitStruct.Pin = xRST_Pin|LCD_DCX_Pin|TP_CS_Pin|LCD_CS_Pin 
+  GPIO_InitStruct.Pin = xRST_Pin|LCD_DCX_Pin|TP_CS_Pin|LCD_CS_Pin
                           |REG_SYNC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

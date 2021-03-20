@@ -571,6 +571,11 @@
               <FileType>4</FileType>
               <FilePath>..\Middlewares\Third_Party\STemWin\libSTemWin_CM3_wc16.a</FilePath>
             </File>
+            <File>
+              <FileName>ili9486.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ili9486.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

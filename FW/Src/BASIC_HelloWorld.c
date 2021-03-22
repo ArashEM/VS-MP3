@@ -22,7 +22,7 @@ Purpose     : Simple demo drawing "Hello world"
 
 #include "GUI.h"
 #include <stdio.h>
-
+#include "moon.c"
 /*********************************************************************
 *
 *       Public code
@@ -33,12 +33,15 @@ Purpose     : Simple demo drawing "Hello world"
 *
 *       MainTask
 */
+
 void show_banner(void) {
 	int xPos, yPos;
 	char message[30];
 	
 	
   GUI_Clear();
+	/* Draw the fixed background for all the animations */
+  GUI_DrawBitmap(&bmmoon, 0, 0);
 	xPos = LCD_GetXSize() / 2;
 	yPos = LCD_GetYSize() / 5;
   GUI_SetFont(&GUI_Font24_ASCII);

@@ -3,6 +3,11 @@ script:
   - cd FW/
   - make 
 
+# safelist
+branches:
+  only:
+  - master
+
 addons:
   apt:
     sources:

@@ -12,14 +12,15 @@
 
 Here is list of main element used in my MP3P project:
 
-- VS1063 as MP3 / FLAC decoder
-- STM32F103RCT6 as main controller 
+- `VS1063a` as MP3 / FLAC decoder
+- `STM32F103RCT6` as main controller 
 - Can be powered from USB and Li-ion battery (without interruption on exchange)
-- TP62110 as switching regulator (3v7 to 3v3)
-- MAX1555 Li-ion battery charger
-- LTC4214 Power Path controller 
-- SDIO 4bit connection (<u>which only 1bit got working</u>!)
-- Header pin for LCD connection
+-  `TPS62110QRSARQ1`  as switching regulator (3v7 to 3v3)
+
+- `MAX1555EZK` Li-ion battery charger
+- `LTC4412ES6` Power Path controller 
+- `SDIO` 4bit connection (<u>which only 1bit got working</u>!)
+- Header pin for LCD connection (Compatible with Raspberry Pi hats)
 
 # Notes
 

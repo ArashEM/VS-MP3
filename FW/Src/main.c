@@ -28,6 +28,7 @@
 #include "sdio.h"
 #include "spi.h"
 #include "usart.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -102,13 +103,13 @@ int main(void)
   MX_USART2_UART_Init();
   MX_DAC_Init();
   MX_SPI1_Init();
-  MX_USART1_UART_Init();
   MX_ADC1_Init();
   MX_SDIO_SD_Init();
   MX_I2C1_Init();
   MX_SPI2_Init();
   MX_FATFS_Init();
   MX_CRC_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	/* Wait for LCD to startup */
 	HAL_Delay(2000);
@@ -173,8 +174,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC|RCC_PERIPHCLK_USB;
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL_DIV1_5;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();

@@ -1149,21 +1149,21 @@ int  GUI_SPY_X_StartServer(void);
 *
 *       QR-Codes
 */
-#define GUI_QR_ECLEVEL_L 0
-#define GUI_QR_ECLEVEL_M 1
-#define GUI_QR_ECLEVEL_Q 2
-#define GUI_QR_ECLEVEL_H 3
+//#define GUI_QR_ECLEVEL_L 0
+//#define GUI_QR_ECLEVEL_M 1
+//#define GUI_QR_ECLEVEL_Q 2
+//#define GUI_QR_ECLEVEL_H 3
 
-typedef struct {
-  int Version;  // Version according to QR code documentation
-  int Width;    // Number of 'Modules'
-  int Size;     // Size of bitmap in pixels
-} GUI_QR_INFO;
+//typedef struct {
+//  int Version;  // Version according to QR code documentation
+//  int Width;    // Number of 'Modules'
+//  int Size;     // Size of bitmap in pixels
+//} GUI_QR_INFO;
 
-GUI_HMEM GUI_QR_Create (const char * pText, int PixelSize, int EccLevel, int Version);
-void     GUI_QR_Draw   (GUI_HMEM hQR, int xPos, int yPos);
-void     GUI_QR_GetInfo(GUI_HMEM hQR, GUI_QR_INFO * pInfo);
-void     GUI_QR_Delete (GUI_HMEM hQR);
+//GUI_HMEM GUI_QR_Create (const char * pText, int PixelSize, int EccLevel, int Version);
+//void     GUI_QR_Draw   (GUI_HMEM hQR, int xPos, int yPos);
+//void     GUI_QR_GetInfo(GUI_HMEM hQR, GUI_QR_INFO * pInfo);
+//void     GUI_QR_Delete (GUI_HMEM hQR);
 
 /*********************************************************************
 *

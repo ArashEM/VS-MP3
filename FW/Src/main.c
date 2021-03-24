@@ -37,7 +37,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "ili9340.h"
-//#include "WM.h"
+#include "WM.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -79,7 +79,6 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -116,7 +115,7 @@ int main(void)
 	/* Init the STemWin GUI Library */
   GUI_Init();
 	/* Activate the use of memory device feature */
-  // WM_SetCreateFlags(WM_CF_MEMDEV);
+  WM_SetCreateFlags(WM_CF_MEMDEV);
 	show_banner();
   /* USER CODE END 2 */
 

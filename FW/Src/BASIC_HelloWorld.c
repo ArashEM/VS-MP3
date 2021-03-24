@@ -23,6 +23,7 @@ Purpose     : Simple demo drawing "Hello world"
 #include "GUI.h"
 #include <stdio.h>
 #include "moon.c"
+#include "mountain.c"
 /*********************************************************************
 *
 *       Public code
@@ -35,21 +36,15 @@ Purpose     : Simple demo drawing "Hello world"
 */
 
 void show_banner(void) {
-	int xPos, yPos;
 	char message[30];
-	
 	
   GUI_Clear();
 	/* Draw the fixed background for all the animations */
-  GUI_DrawBitmap(&bmmoon, 0, 0);
-	xPos = LCD_GetXSize() / 2;
-	yPos = LCD_GetYSize() / 5;
-  GUI_SetFont(&GUI_Font24_ASCII);
-	GUI_DispStringHCenterAt("VS-MP3 player ...", xPos, yPos);
-	
+  GUI_DrawBitmap(&bmmountain, 0, 0);
+  GUI_SetFont(&GUI_Font20_ASCII);
+	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
 	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
-	yPos = LCD_GetYSize() / 3;
-	GUI_DispStringHCenterAt(message, xPos, yPos);
+	GUI_DispStringAt(message, 0, 20);
 }
 
 /*************************** End of file ****************************/

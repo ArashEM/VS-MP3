@@ -23,7 +23,7 @@
 #include "usbd_storage_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "bsp_driver_sd.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -192,9 +192,18 @@ int8_t STORAGE_Init_FS(uint8_t lun)
 int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
   /* USER CODE BEGIN 3 */
-  *block_num  = STORAGE_BLK_NBR;
-  *block_size = STORAGE_BLK_SIZ;
-  return (USBD_OK);
+  HAL_SD_CardInfoTypeDef info;
+  int8_t ret = USBD_FAIL;
+
+  if (BSP_SD_IsDetected() != SD_NOT_PRESENT)
+  {
+    BSP_SD_GetCardInfo(&info);
+
+    *block_num = info.LogBlockNbr - 1;
+    *block_size = info.LogBlockSize;
+    ret = USBD_OK;
+  }
+  return ret;
   /* USER CODE END 3 */
 }
 
@@ -206,7 +215,27 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
 int8_t STORAGE_IsReady_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 4 */
-  return (USBD_OK);
+   static int8_t prev_status = 0;
+  int8_t ret = USBD_FAIL;
+
+  if (BSP_SD_IsDetected() != SD_NOT_PRESENT)
+  {
+    if (prev_status < 0)
+    {
+      BSP_SD_Init();
+      prev_status = 0;
+
+    }
+    if (BSP_SD_GetCardState() == SD_TRANSFER_OK)
+    {
+      ret = USBD_OK;
+    }
+  }
+  else if (prev_status == 0)
+  {
+    prev_status = -1;
+  }
+  return ret;
   /* USER CODE END 4 */
 }
 
@@ -230,7 +259,19 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
-  return (USBD_OK);
+  int8_t ret = USBD_FAIL;
+
+  if (BSP_SD_IsDetected() != SD_NOT_PRESENT)
+  {
+    BSP_SD_ReadBlocks((uint32_t *) buf, blk_addr, blk_len, 1000);
+
+    /* Wait until SD card is ready to use for new operation */
+    while (BSP_SD_GetCardState() != SD_TRANSFER_OK)
+    {
+    }
+    ret = USBD_OK;
+  }
+  return ret;
   /* USER CODE END 6 */
 }
 
@@ -242,7 +283,19 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
-  return (USBD_OK);
+  int8_t ret = USBD_FAIL;
+
+  if (BSP_SD_IsDetected() != SD_NOT_PRESENT)
+  {
+    BSP_SD_WriteBlocks((uint32_t *) buf, blk_addr, blk_len, 1000);
+
+    /* Wait until SD card is ready to use for new operation */
+    while (BSP_SD_GetCardState() != SD_TRANSFER_OK)
+    {
+    }
+    ret = USBD_OK;
+  }
+  return ret;
   /* USER CODE END 7 */
 }
 

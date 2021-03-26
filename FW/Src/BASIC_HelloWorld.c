@@ -24,6 +24,7 @@ Purpose     : Simple demo drawing "Hello world"
 #include <stdio.h>
 #include "moon.c"
 #include "mountain.c"
+#include "main.h"
 /*********************************************************************
 *
 *       Public code
@@ -40,11 +41,16 @@ void show_banner(void) {
 	
   GUI_Clear();
 	/* Draw the fixed background for all the animations */
-  GUI_DrawBitmap(&bmmountain, 0, 0);
-  GUI_SetFont(&GUI_Font20_ASCII);
-	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
-	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
-	GUI_DispStringAt(message, 0, 20);
+//  GUI_DrawBitmap(&bmmountain, 0, 0);
+//  GUI_SetFont(&GUI_Font20_ASCII);
+//	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
+//	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
+//	GUI_DispStringAt(message, 0, 20);
+	Createframewin();
+	while (1) {
+    GUI_Delay(500);
+		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+  }
 }
 
 /*************************** End of file ****************************/

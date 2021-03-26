@@ -22,6 +22,7 @@
 // USER END
 
 #include "DIALOG.h"
+#include "main.h"
 
 /*********************************************************************
 *
@@ -1137,6 +1138,8 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
   int          NCode;
   int          Id;
   // USER START (Optionally insert additional variables)
+	int Value;
+	char acBuffer[32];
   // USER END
 
   switch (pMsg->MsgId) {
@@ -1189,10 +1192,27 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
       }
       break;
     // USER START (Optionally insert additional code for further Ids)
+		case ID_PROGBAR_0: // Notifications sent by 'battery'
+			switch(NCode) {
+      case WM_NOTIFICATION_VALUE_CHANGED:
+        //
+        // Invalidate parent window when GAUGE's value has changed to update the displayed value.
+        //
+        WM_InvalidateWindow(pMsg->hWin);
+        break;
+      }
+			break;	
     // USER END
     }
     break;
   // USER START (Optionally insert additional message handling)
+	case WM_PAINT:	
+	  GUI_SetBkColor(GUI_WHITE);
+    GUI_Clear();
+    GUI_SetColor(GUI_BLACK);
+		Value = PROGBAR_GetValue(WM_GetDialogItem(hItem, ID_PROGBAR_0));
+    sprintf(acBuffer, "Value: %d", Value);
+		GUI_DispStringAt(acBuffer, 220, 30);
   // USER END
   default:
     WM_DefaultProc(pMsg);
@@ -1213,8 +1233,18 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 WM_HWIN Createframewin(void);
 WM_HWIN Createframewin(void) {
   WM_HWIN hWin;
-
+	int counter = 0;
+	
   hWin = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbDialog, WM_HBKWIN, 0, 0);
+	
+	while (1) {
+    GUI_Delay(500);
+		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+		counter++;
+		if(counter == 100)
+			counter = 0;
+		PROGBAR_SetValue(WM_GetDialogItem(hWin, ID_PROGBAR_0), counter);
+  }
   return hWin;
 }
 

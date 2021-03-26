@@ -47,10 +47,6 @@ void show_banner(void) {
 //	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
 //	GUI_DispStringAt(message, 0, 20);
 	Createframewin();
-	while (1) {
-    GUI_Delay(500);
-		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-  }
 }
 
 /*************************** End of file ****************************/

@@ -27,15 +27,17 @@ void writeMdata(uint8_t *c, uint32_t num)
   HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET); /* deselect LCD */
 }
 
-void tft_reset(void)
+void ili9340_init(void)
 {
+	/* power on LCD supply */
+	HAL_GPIO_WritePin(PWR_EXT_GPIO_Port, PWR_EXT_Pin, GPIO_PIN_RESET);
+	/* Wait for LCD to startup */
+	HAL_Delay(500);
+	// reset LCD controller 
 	HAL_GPIO_WritePin(LCD_RSTN_GPIO_Port, LCD_RSTN_Pin, GPIO_PIN_RESET);
 	HAL_Delay(100);
 	HAL_GPIO_WritePin(LCD_RSTN_GPIO_Port, LCD_RSTN_Pin, GPIO_PIN_SET);
-}
-
-void tft_init(void)
-{
+	
 	writecommand(0x01); // Software reset
 	HAL_Delay(5);
 	

@@ -111,8 +111,6 @@ int main(void)
   MX_CRC_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	/* Wait for LCD to startup */
-	HAL_Delay(2000);
 	/* Init the STemWin GUI Library */
   GUI_Init();
 	/* Activate the use of memory device feature */
@@ -131,7 +129,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+		HAL_Delay(2000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

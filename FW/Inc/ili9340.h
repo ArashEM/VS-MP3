@@ -122,8 +122,7 @@ void writedata(uint8_t c);
 void writeMdata(uint8_t *c, uint32_t num);
 
 
-void tft_reset(void);
-void tft_init(void);
+void ili9340_init(void);
 void tft_drawPixel(uint32_t x, uint32_t y, uint32_t color);
 void tft_drawCircle(int32_t x0, int32_t y0, int32_t r, uint32_t color);
 

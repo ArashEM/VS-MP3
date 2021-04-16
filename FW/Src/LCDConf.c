@@ -54,6 +54,7 @@ Purpose     : Display driver configuration file
 #include "GUIDRV_FlexColor.h"
 #include "main.h"
 #include "ili9340.h"
+#include "ili9486.h"
 
 /*********************************************************************
 *
@@ -65,8 +66,15 @@ Purpose     : Display driver configuration file
 //
 // Physical display size
 //
-#define XSIZE_PHYS  240
-#define YSIZE_PHYS  320
+#if   defined ( LCD_ILI9340 )
+	#define XSIZE_PHYS  240
+	#define YSIZE_PHYS  320
+#elif defined ( LCD_ILI9486 ) 
+  #define XSIZE_PHYS  320
+	#define YSIZE_PHYS  480
+#else
+  #error No LCD controller is defined
+#endif 
 
 /*********************************************************************
 *
@@ -128,8 +136,13 @@ static void LCD_LL_Init(void);
 */
 static void LcdWriteReg(U8 Data)
 {
-   //LCD_IO_WriteReg((uint8_t)Data);
-		writecommand((uint8_t)Data);
+#if   defined ( LCD_ILI9340 )
+	writecommand((uint8_t)Data);
+#elif defined ( LCD_ILI9486 )
+  LCD_WR_REG((U8) Data);
+#else
+  #error No LCD controller is defined
+#endif 	
 }
 
 /********************************************************************
@@ -141,11 +154,13 @@ static void LcdWriteReg(U8 Data)
 */
 static void LcdWriteData(U8 Data)
 {
-   //LCD_IO_WriteMultipleData((uint8_t*)&Data, 2);
-	 writedata((uint8_t)Data);
-	//uint8_t tmp;
-	//tmp = Data && 0xFF;
-	//writedata(tmp);
+#if   defined ( LCD_ILI9340 )
+	writedata((uint8_t)Data);
+#elif defined ( LCD_ILI9486 )
+  LCD_WR_DATA8((U8) Data);
+#else
+  #error No LCD controller is defined
+#endif 	
 }
 
 /********************************************************************
@@ -157,15 +172,14 @@ static void LcdWriteData(U8 Data)
 */
 static void LcdWriteDataMultiple(U8 *pData, int NumItems)
 {
-   //LCD_IO_WriteMultipleData((uint8_t *) pData, 2 * NumItems);
-	  writeMdata((uint8_t *)pData, NumItems);
-	//uint8_t	tmp;
-	//while(NumItems--) {
-	//	tmp = (*pData) && 0x00FF;
-	//	writedata(tmp);
-	//	tmp = (*pData >> 8) && 0x00FF;
-	//	writedata(tmp);
-	//}
+ #if   defined ( LCD_ILI9340 )
+	writeMdata((uint8_t *) pData, NumItems);
+#elif defined ( LCD_ILI9486 )
+  LCD_WR_MDATA8((U8 *) pData, NumItems);
+#else
+  #error No LCD controller is defined
+#endif 	  
+	  
 }
 
 /********************************************************************
@@ -202,19 +216,14 @@ static void LcdReadDataMultiple(U8 *pData, int NumItems)
   * @retval LCD state
   */
 static void LCD_LL_Init(void)
-{
-//  if (ili9320_drv.ReadID() == ILI9320_ID)
-//  {
-//    ili9320_Init();
-//  }
-//  else
-//  {
-//    ili9325_Init();
-//  }
-	
-	tft_reset();
-	tft_init();
-	
+{	
+#if   defined ( LCD_ILI9340 )
+	ili9340_init();
+#elif defined ( LCD_ILI9486 )
+  ili9486_init();
+#else
+  #error No LCD controller is defined
+#endif 
 }
 
 /*********************************************************************
@@ -243,14 +252,15 @@ void LCD_X_Config(void)
   //
   // Orientation
   //
-  //if (ili9320_drv.ReadID() == ILI9320_ID)
-  //{
-  //Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  //}
- // else
- // {
-    Config.Orientation =  GUI_SWAP_XY ;
- // }
+#if   defined ( LCD_ILI9340 )
+	Config.Orientation =  GUI_SWAP_XY ;
+#elif defined ( LCD_ILI9486 )
+  Config.Orientation =  GUI_SWAP_XY ;
+#else
+  #error No LCD controller is defined
+#endif 
+    
+
 
   GUIDRV_FlexColor_Config(pDevice, &Config);
   //

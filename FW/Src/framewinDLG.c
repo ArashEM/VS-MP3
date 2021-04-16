@@ -19,6 +19,7 @@
 */
 
 // USER START (Optionally insert additional includes)
+#include <stdio.h>
 // USER END
 
 #include "DIALOG.h"
@@ -1185,6 +1186,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
         break;
       case WM_NOTIFICATION_VALUE_CHANGED:
         // USER START (Optionally insert code for reacting on notification message)
+				WM_InvalidateWindow(pMsg->hWin);
         // USER END
         break;
       // USER START (Optionally insert additional code for further notification handling)
@@ -1202,6 +1204,17 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
         break;
       }
 			break;	
+			
+		case ID_PROGBAR_1: // Notifications sent by 'battery'
+			switch(NCode) {
+      case WM_NOTIFICATION_VALUE_CHANGED:
+        //
+        // Invalidate parent window when GAUGE's value has changed to update the displayed value.
+        //
+        WM_InvalidateWindow(pMsg->hWin);
+        break;
+      }
+			break;	
     // USER END
     }
     break;
@@ -1210,9 +1223,11 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 	  GUI_SetBkColor(GUI_WHITE);
     GUI_Clear();
     GUI_SetColor(GUI_BLACK);
-		Value = PROGBAR_GetValue(WM_GetDialogItem(hItem, ID_PROGBAR_0));
+		hItem = WM_GetDialogItem(pMsg->hWin, ID_PROGBAR_0);
+		Value = SLIDER_GetValue(hItem);
     sprintf(acBuffer, "Value: %d", Value);
 		GUI_DispStringAt(acBuffer, 220, 30);
+		break;
   // USER END
   default:
     WM_DefaultProc(pMsg);
@@ -1244,11 +1259,100 @@ WM_HWIN Createframewin(void) {
 		if(counter == 100)
 			counter = 0;
 		PROGBAR_SetValue(WM_GetDialogItem(hWin, ID_PROGBAR_0), counter);
+		PROGBAR_SetValue(WM_GetDialogItem(hWin, ID_PROGBAR_1), counter);
+		SLIDER_SetValue(WM_GetDialogItem(hWin, ID_PROGBAR_1), counter);
   }
   return hWin;
 }
 
 // USER START (Optionally insert additional public code)
+static WM_HWIN hSlider;
+static void _cbWin(WM_MESSAGE * pMsg) {
+  int            NCode, Id;
+  int            Value;
+  char           acBuffer[32];
+
+  switch(pMsg->MsgId) {
+  case WM_CREATE:
+    //
+    // Create horizonzal slider. A vertical slider can be created with SLIDER_CF_VERTICAL instead.
+    //
+    hSlider = SLIDER_CreateEx(10, 10, 150, 30, pMsg->hWin, WM_CF_SHOW, SLIDER_CF_HORIZONTAL, GUI_ID_SLIDER0);
+    //
+    // Set range of slider
+    //
+    SLIDER_SetRange(hSlider, 0, 100);
+    //
+    // Set number of tick marks
+    //
+    SLIDER_SetNumTicks(hSlider, 10);
+    //
+    // Set value of slider
+    //
+    SLIDER_SetValue(hSlider, 20);
+    //
+    // Set width of thumb
+    //
+    SLIDER_SetWidth(hSlider, 20);
+    break;
+  case WM_PAINT:
+    GUI_SetBkColor(GUI_WHITE);
+    GUI_Clear();
+    GUI_SetFont(&GUI_Font13B_1);
+    GUI_SetColor(GUI_BLACK);
+    //
+    // Display slider value
+    //
+    Value = SLIDER_GetValue(hSlider);
+    sprintf(acBuffer, "Value is: %x", Value);
+    GUI_DispStringAt(acBuffer, 10, 50);
+    break;
+  case WM_NOTIFY_PARENT:
+    Id    = WM_GetId(pMsg->hWinSrc);
+    NCode = pMsg->Data.v;
+    switch(Id) {
+    case GUI_ID_SLIDER0:
+      switch(NCode) {
+      case WM_NOTIFICATION_VALUE_CHANGED:
+        //
+        // Redraw the window when a value has changed so the displayed value will be updated.
+        //
+        WM_InvalidateWindow(pMsg->hWin);
+        break;
+      }
+      break;
+    }
+    break;
+  default:
+    WM_DefaultProc(pMsg);
+  }
+}
+
+/*********************************************************************
+*
+*       Public code
+*
+**********************************************************************
+*/
+/*********************************************************************
+*
+*       MainTask
+*/
+void MainTask(void) {
+	int i=0;
+  //
+  // Create parent window.
+  //
+  WM_CreateWindowAsChild(0, 0, LCD_GetXSize(), LCD_GetYSize(), WM_HBKWIN, WM_CF_SHOW, _cbWin, 0);
+
+  while (1) {
+		SLIDER_SetValue(hSlider,i);
+		i++;
+    GUI_Delay(100);
+  }
+}
+
+/*************************** End of file ****************************/
 // USER END
 
 /*************************** End of file ****************************/

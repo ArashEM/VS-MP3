@@ -41,12 +41,14 @@ void show_banner(void) {
 	
   GUI_Clear();
 	/* Draw the fixed background for all the animations */
-//  GUI_DrawBitmap(&bmmountain, 0, 0);
-//  GUI_SetFont(&GUI_Font20_ASCII);
-//	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
-//	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
-//	GUI_DispStringAt(message, 0, 20);
-	Createframewin();
+  GUI_DrawBitmap(&bmmountain, 0, 0);
+  GUI_SetFont(&GUI_Font20_ASCII);
+	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
+	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
+	GUI_DispStringAt(message, 0, 20);
+	//WM_MULTIBUF_Enable(1);
+	//MainTask();
+	//Createframewin();
 }
 
 /*************************** End of file ****************************/

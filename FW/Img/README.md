@@ -12,6 +12,5 @@ According to LCD interface and color depth, image are converted via _565_ color 
 
 Here is list of image and there use case in project 
 
-1. `moon.jpg` : Use as background for all screens.
-
-sd
+1. `moon.jpg`
+2. `tired-owl.png`

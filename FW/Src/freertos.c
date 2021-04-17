@@ -277,17 +277,14 @@ void emwin_task_fn(void const * argument)
 {
   /* USER CODE BEGIN emwin_task_fn */
 	int i = 0;
-	int xPos, yPos;
-	xPos = LCD_GetXSize() / 2;
-	yPos = LCD_GetYSize() / 3;
   /* Infinite loop */
   for(;;)
   {
-		GUI_DispStringHCenterAt(fno.fname, xPos, yPos+50);
-		GUI_DispDecAt( i++, 20,200,4);
+		GUI_DispStringAtCEOL(fno.fname, 160, 220);
+		GUI_DispDecAt( i++, 10,220,4);
 			if (i > 9999) 
 					i = 0;
-    osDelay(100);
+    osDelay(1000);
   }
   /* USER CODE END emwin_task_fn */
 }

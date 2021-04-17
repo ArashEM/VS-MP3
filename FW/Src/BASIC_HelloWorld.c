@@ -24,6 +24,7 @@ Purpose     : Simple demo drawing "Hello world"
 #include <stdio.h>
 #include "moon.c"
 #include "mountain.c"
+#include "owl.c"
 #include "main.h"
 /*********************************************************************
 *
@@ -39,16 +40,14 @@ Purpose     : Simple demo drawing "Hello world"
 void show_banner(void) {
 	char message[30];
 	
+	GUI_SetBkColor(GUI_WHITE);
   GUI_Clear();
-	/* Draw the fixed background for all the animations */
-  GUI_DrawBitmap(&bmmountain, 0, 0);
-  GUI_SetFont(&GUI_Font20_ASCII);
+  GUI_DrawBitmap(&bmowl, 70, 30);
+	GUI_SetColor(GUI_BLACK);
+  GUI_SetFont(&GUI_Font16_ASCII);
 	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
 	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
-	GUI_DispStringAt(message, 0, 20);
-	//WM_MULTIBUF_Enable(1);
-	//MainTask();
-	//Createframewin();
+	GUI_DispStringAt(message, 120, 0);
 }
 
 /*************************** End of file ****************************/

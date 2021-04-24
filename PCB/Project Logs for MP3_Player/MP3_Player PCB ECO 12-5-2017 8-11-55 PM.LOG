@@ -1,7 +1,0 @@
-Removed Pin From Net: NetName=BOOT1 Pin=C67-2
-Removed Pin From Net: NetName=BOOT1 Pin=S3-2
-Removed Pin From Net: NetName=REG_LBO Pin=U9-9
-Added Pin To Net: NetName=KEY1 Pin=C67-2
-Added Pin To Net: NetName=KEY1 Pin=S3-2
-Added Pin To Net: NetName=KEY1 Pin=U9-9
-Added Net: Name=KEY1

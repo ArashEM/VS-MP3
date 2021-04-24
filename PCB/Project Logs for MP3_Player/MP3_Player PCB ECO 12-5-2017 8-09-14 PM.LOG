@@ -1,4 +1,0 @@
-Removed Pin From Net: NetName=REG_SYNC Pin=U9-10
-Removed Pin From Net: NetName=C\H\G\ Pin=U9-11
-Added Pin To Net: NetName=KEY2 Pin=U9-10
-Added Pin To Net: NetName=KEY3 Pin=U9-11

@@ -4,9 +4,9 @@
 
 `VS1063` is an audio encoder/decoder from [VLSI solution](http://www.vlsi.fi/en/home.html). Base on VS1063 and STM32F1X, I'd designed a simple MP3 player. 
 
-![MP3P-Top](Documents/Pictures/IMAG1204.jpg)
+![MP3P-Top](DOC/Pictures/IMAG1204.jpg)
 
-![MP3P-Bottom](Documents/Pictures/IMAG1203.jpg)
+![MP3P-Bottom](DOC/Pictures/IMAG1203.jpg)
 
 # Specification
 
@@ -15,8 +15,7 @@ Here is list of main element used in my MP3P project:
 - `VS1063a` as MP3 / FLAC decoder
 - `STM32F103RCT6` as main controller 
 - Can be powered from USB and Li-ion battery (without interruption on exchange)
--  `TPS62110QRSARQ1`  as switching regulator (3v7 to 3v3)
-
+- `TPS62110QRSARQ1`  as switching regulator (3v7 to 3v3)
 - `MAX1555EZK` Li-ion battery charger
 - `LTC4412ES6` Power Path controller 
 - `SDIO` 4bit connection (<u>which only 1bit got working</u>!)
@@ -32,3 +31,9 @@ Here is some important notes about this project
 4. Before any decision about this board, as good friend said: **Check it yourself** !
 5. Finally ... Have fun ...
 
+## File hierarchy 
+- `FW`: includes Keil/Makefile based source code wihch is generated via `STM32CubeMx` and `FW_F1-V1.8.3`
+- `HW`: includes schematic/pcb project 
+  - `main`: MP3 player main board 
+  - `dtr`: LCD and touch screen daughter board
+- `DOC`: includes general documents about this project (e.g. datasheets and ...)

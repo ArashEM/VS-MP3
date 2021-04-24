@@ -1,0 +1,6 @@
+[ProjectGroup]
+Version=1.0
+[Project1]
+ProjectPath=LCD-DTR.PrjPcb
+[Project2]
+ProjectPath=..\..\..\PCBLib\PCB3D_LIB\Connector_IntLib.LibPkg

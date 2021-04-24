@@ -1,4 +1,0 @@
-Removed Pin From Net: NetName=SD_CD Pin=U9-41
-Removed Pin From Net: NetName=LED2 Pin=U9-55
-Added Pin To Net: NetName=LED2 Pin=U9-41
-Added Pin To Net: NetName=SD_CD Pin=U9-55

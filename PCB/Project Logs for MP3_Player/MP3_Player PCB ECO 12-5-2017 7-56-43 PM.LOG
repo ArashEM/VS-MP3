@@ -1,3 +1,0 @@
-Removed Pin From Net: NetName=LED2 Pin=U9-41
-Removed Pin From Net: NetName=HDR_IO3 Pin=U9-61
-Added Pin To Net: NetName=HDR_IO3 Pin=U9-41

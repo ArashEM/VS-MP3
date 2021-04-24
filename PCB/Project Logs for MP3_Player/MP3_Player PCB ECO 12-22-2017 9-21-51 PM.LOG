@@ -1,4 +1,0 @@
-Removed Pin From Net: NetName=HDR_IO3 Pin=P2-16
-Removed Pin From Net: NetName=HDR_IO4 Pin=P2-18
-Added Pin To Net: NetName=HDR_IO3 Pin=P2-13
-Added Pin To Net: NetName=HDR_IO4 Pin=P2-15

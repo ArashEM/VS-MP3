@@ -1,6 +1,0 @@
-Removed Pin From Net: NetName=VCC_3V3 Pin=R1-1
-Removed Pin From Net: NetName=SD_CD Pin=R1-2
-Removed Pin From Net: NetName=NetC69_2 Pin=SD1-10
-Removed Member From Class: ClassName=Interfaces Member=R1
-Added Pin To Net: NetName=GND Pin=SD1-10
-Added Pin To Net: NetName=NetC69_2 Pin=SD1-13

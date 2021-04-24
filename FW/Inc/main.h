@@ -91,10 +91,10 @@ void Error_Handler(void);
 #define LCD_CS_GPIO_Port GPIOB
 #define LCD_RSTN_Pin GPIO_PIN_6
 #define LCD_RSTN_GPIO_Port GPIOC
-#define HDR_IO2_Pin GPIO_PIN_7
-#define HDR_IO2_GPIO_Port GPIOC
-#define HDR_IO1_Pin GPIO_PIN_8
-#define HDR_IO1_GPIO_Port GPIOA
+#define TP_IRQ_Pin GPIO_PIN_7
+#define TP_IRQ_GPIO_Port GPIOC
+#define BL_PWM_Pin GPIO_PIN_8
+#define BL_PWM_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14

@@ -31,6 +31,10 @@ void ili9340_init(void)
 {
 	/* power on LCD supply */
 	HAL_GPIO_WritePin(PWR_EXT_GPIO_Port, PWR_EXT_Pin, GPIO_PIN_RESET);
+	
+	/* power of Backlight */
+	HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
+	
 	/* Wait for LCD to startup */
 	HAL_Delay(500);
 	// reset LCD controller 

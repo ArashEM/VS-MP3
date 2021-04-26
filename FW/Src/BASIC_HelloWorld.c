@@ -46,7 +46,7 @@ void show_banner(void) {
 	GUI_SetColor(GUI_BLACK);
   GUI_SetFont(&GUI_Font16_ASCII);
 	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
-	sprintf(message,"Build #%s: %s",__DATE__, __TIME__);
+	sprintf(message,"Built on %s: %s",__DATE__, __TIME__);
 	GUI_DispStringAt(message, 120, 0);
 }
 

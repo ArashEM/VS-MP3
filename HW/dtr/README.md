@@ -1,6 +1,12 @@
 # Introduction
 
 This folder contains SCH/PCB files for LCD daughter board 
+
+![LCD-Top](../../DOC/Pictures/lcd-dtr-top.jpg)
+
+![LCD-Bot](../../DOC/Pictures/lcd-dtr-bottom.jpg)
+
+
 This board contains following items 
 - **40pin-FPC** connector which is compatible with following LCDs
   - *ZJY320IT008*: 3.2 inch *240x320* dots matrix TFT LCD module with `ili9341` controller

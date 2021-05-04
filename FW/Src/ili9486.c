@@ -97,7 +97,16 @@ void Address_set(uint32_t x1,uint32_t y1,uint32_t x2,uint32_t y2)
 
 void ili9486_init(void)
 {
-
+	/* power on LCD supply */
+	HAL_GPIO_WritePin(PWR_EXT_GPIO_Port, PWR_EXT_Pin, GPIO_PIN_RESET);
+	
+	/* power of Backlight */
+	HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
+	
+	/* Wait for LCD to startup */
+	HAL_Delay(500);
+	
+	// reset LCD controller 
 	HAL_GPIO_WritePin(LCD_RSTN_GPIO_Port, LCD_RSTN_Pin, GPIO_PIN_RESET);
 	HAL_Delay(100);
 	HAL_GPIO_WritePin(LCD_RSTN_GPIO_Port, LCD_RSTN_Pin, GPIO_PIN_SET);

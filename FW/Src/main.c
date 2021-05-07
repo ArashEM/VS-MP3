@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include "ili9340.h"
 #include "WM.h"
+#include "mp3_player.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -116,12 +117,13 @@ int main(void)
 	/* Activate the use of memory device feature */
   WM_SetCreateFlags(WM_CF_MEMDEV);
 	show_banner();
+	vsmp3_init(NULL);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+  //MX_FREERTOS_Init();
   /* Start scheduler */
-  osKernelStart();
+  //osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */

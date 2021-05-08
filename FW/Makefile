@@ -154,8 +154,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DSTM32F103xE \
--DLCD_ILI9340
+-DSTM32F103xE 
 
 
 # AS includes

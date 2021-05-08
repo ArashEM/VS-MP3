@@ -10,7 +10,8 @@ Src/ili9340.c \
 Src/LCDConf.c \
 Src/misc_fatfs.c \
 Src/retarget.c \
-Src/vs10xx.c 
+Src/vs10xx.c \
+Src/mp3_player.c 
 
 
 ######################################

@@ -724,11 +724,6 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f1xx_hal_timebase_tim.c</FilePath>
             </File>
-            <File>
-              <FileName>mp3_player.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\mp3_player.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -748,6 +743,11 @@
               <FileName>vs10xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\vs10xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>mp3_player.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mp3_player.c</FilePath>
             </File>
           </Files>
         </Group>

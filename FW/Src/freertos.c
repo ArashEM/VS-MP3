@@ -224,7 +224,7 @@ void mp3p_task_fn(void const * argument)
 					//vs_wait();
 					if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET)
 					{
-						osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
+						//osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
 					}
 					HAL_SPI_Transmit(&hspi1, rd_data, bytesread , 0xFFFF);
 					
@@ -236,7 +236,7 @@ void mp3p_task_fn(void const * argument)
 					//vs_wait();
 					if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET)
 					{
-						osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
+						//osSemaphoreWait(vs10xx_dreq_semHandle, osWaitForever);
 					}
 					HAL_SPI_Transmit(&hspi1, rd_data, sizeof(rd_data), 0xFFFF);
 				}

@@ -13,6 +13,7 @@
 
 /* General headers */
 #include <stdint.h>
+#include <stdio.h>
 #include "fatfs.h"
 #include "lwrb/lwrb.h"
 
@@ -82,7 +83,17 @@ enum {
 };
 
 /* constants and macro */
-#define STREAM_BUFF_SIZE			1000
+#define STREAM_BUFF_SIZE			512
 #define STREAM_BUFF_HALF_SIZE	(STREAM_BUFF_SIZE)/2
+
+/*debug macro */
+#define DEBUG 1
+
+#if defined( DEBUG ) 
+	#define debug_print(fmt, args...) 	printf("DEBUG: %s:%d:%s(): " fmt, \
+    __FILE__, __LINE__, __func__, ##args)
+#else
+	#define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+#endif
 
 #endif /* MP3_PLAYER_H */

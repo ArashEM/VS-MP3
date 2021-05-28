@@ -21,8 +21,9 @@
 #include "vs10xx.h"
 
 /* Global variable */
-struct controller_qlist* qlist;				/* queue list for all tasks */
+struct controller_qlist*	qlist;			/* queue list for all tasks */
 FATFS 										fs;  				/* FS object for SD card logical drive */
+SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 
 /**
  * \brief initilize mp3-player and creat related tasks  	
@@ -80,10 +81,17 @@ void vsmp3_init(void *vparameters)
 	/* debug */
 	debug_print("task creation done\r\n");
 	
+	/* create binary semaphore for VS10xx DREQ interrup */
+	dreq_sem = xSemaphoreCreateBinary();
+	configASSERT(dreq_sem);
+	
 	/* mount SD card */
 	if (f_mount(&fs,"", 0	) != FR_OK) {
 		debug_print("f_mount failed\r\n");
 	}
+	
+	/* init vs1063 */
+	vs_setup(&hspi1);
 	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -113,26 +121,27 @@ void vtask_controller(void* vparameters)
 	buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
 	configASSERT(buff);
 	lwrb_init(&sbuff->lwrb, buff, STREAM_BUFF_SIZE);
+	
 	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
+	
+	/* create SD card data stream buffer */
+	qcmd.cmd = CMD_SDCARD_START_READ;
+	qcmd.arg = (uintptr_t) sbuff;
+	xQueueSend(qlist->sdcard, &qcmd, 0);
+	
+	/* start playing mp3 file */
+	qcmd.cmd = CMD_VS10XX_PLAY;
+	qcmd.arg = (uintptr_t) sbuff;
+	xQueueSend(qlist->vs10xx, &qcmd, 0);
+	
+	/* start playing mp3 file */
+	qcmd.cmd = CMD_LED_BLINK_SET;
+	qcmd.arg = 1000;
+	xQueueSend(pqlist->blink, &qcmd, 0);
 	
 	/* main loop */
 	for(;;) {
-		/* create SD card data stream buffer */
-		qcmd.cmd = CMD_SDCARD_START_READ;
-		qcmd.arg = (uintptr_t) sbuff;
-		xQueueSend(qlist->sdcard, &qcmd, 0);
-		
-		/* start playing mp3 file */
-		qcmd.cmd = CMD_VS10XX_PLAY;
-		qcmd.arg = (uintptr_t) sbuff;
-		xQueueSend(qlist->vs10xx, &qcmd, 0);
-		
-		/* start playing mp3 file */
-		qcmd.cmd = CMD_LED_BLINK_SET;
-		qcmd.arg = 500;
-		xQueueSend(pqlist->blink, &qcmd, 0);
-		
-		vTaskDelay(pdMS_TO_TICKS(5110));
+		vTaskDelay(pdMS_TO_TICKS(10000));
 	} /* for(;;) */
 }
 
@@ -170,12 +179,54 @@ void vtask_blink(void* vparameters)
 void vtask_vs10xx(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
-	struct mp3p_cmd						vs10xx_cmd;
+	struct mp3p_cmd 					vs10xx_cmd, sd_cmd;
+	lwrb_t*										lwrb;
+	struct stream_buff*				sbuff;
+	BaseType_t 								xstatus;
+	static BaseType_t					vs_status;
+	void*											buff;
 	
 	/* main loop */
 	for(;;) {
-		xQueueReceive(qlist->vs10xx, &vs10xx_cmd, portMAX_DELAY);
-		debug_print("cmd: %02x, arg: %p\r\n", vs10xx_cmd.cmd, (void *) vs10xx_cmd.arg);
+		/* don't wait for command */
+		xstatus = xQueueReceive(qlist->vs10xx, &vs10xx_cmd, 0);
+		if (xstatus == pdPASS) {
+			debug_print("cmd: %02x, arg: %p\r\n", vs10xx_cmd.cmd 
+																					,	(void *) vs10xx_cmd.arg);
+			sbuff = (struct stream_buff *)vs10xx_cmd.arg;
+			switch (vs10xx_cmd.cmd) {
+				case CMD_VS10XX_PLAY:
+					lwrb = &sbuff->lwrb;
+					vs_status = 0x01;
+				break;
+				
+				case CMD_VS10XX_STOP:
+					vs_status = 0x00;
+					break;
+				
+				default:
+					break; 
+			} /* switch (vs10xx_cmd.cmd) */
+		} /* if (xstatus == pdPASS) */
+		
+		/* playing */
+		if (vs_status == 0x01) {
+			if (HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET) {
+				/* wait for DREQ */
+				xSemaphoreTake(dreq_sem, portMAX_DELAY);
+			}
+			/* on DREQ rising edge, it can accept at last 32 byte of data */
+			buff = lwrb_get_linear_block_read_address(lwrb);
+			HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, 32 , 0xFFFF);
+			lwrb_skip(lwrb, 32);
+			
+			if (lwrb_get_full(lwrb) < STREAM_BUFF_HALF_SIZE ) {
+				/* we need more data in stream buffer */
+				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
+				sd_cmd.arg = (uintptr_t) sbuff;
+				xQueueSend(qlist->sdcard, &sd_cmd, 0);
+			} /* if (lwrb_get_full(lwrb) >= STREAM_BUFF_HALF_SIZE ) */
+		} /* if (vs_status == 0x01) */			
 	} /* for(;;) */
 }
 
@@ -198,7 +249,7 @@ void vtask_sdcard(void* vparameters)
 	for(;;) {
 		/* wait for command queue */
 		xQueueReceive(qlist->sdcard, &sd_cmd, portMAX_DELAY);
-		debug_print("cmd: %02x, arg: %p\r\n", sd_cmd.cmd, (void *) sd_cmd.arg);
+		//debug_print("cmd: %02x, arg: %p\r\n", sd_cmd.cmd, (void *) sd_cmd.arg);
 		
 		sbuff = (struct stream_buff *)sd_cmd.arg;
 		switch(sd_cmd.cmd) {
@@ -229,7 +280,7 @@ void vtask_sdcard(void* vparameters)
 		result = f_read(file, buff, len, &read_len);
 		if (result == FR_OK) {
 			lwrb_advance(lwrb, read_len);
-			debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
+			//debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
 		} 
 	} /* for(;;) */
 }

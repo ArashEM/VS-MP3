@@ -83,8 +83,8 @@ enum {
 };
 
 /* constants and macro */
-#define STREAM_BUFF_SIZE			513
-#define STREAM_BUFF_HALF_SIZE	(STREAM_BUFF_SIZE)/2
+#define STREAM_BUFF_SIZE			1025
+#define STREAM_BUFF_HALF_SIZE	128
 
 /*debug macro */
 #if defined( DEBUG ) 

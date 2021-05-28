@@ -104,6 +104,18 @@ void vs_setup(SPI_HandleTypeDef *hspi)
 		*/
 		vs_write_register(hspi, SCI_CLOCKF, 0xB000);
 		HAL_Delay(5);
+	
+		/* setup vs1063 */
+		vs_set_volume(hspi, 0x30, 0x30);
+		/* increasing SPI clock rate */
+		hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+		if (HAL_SPI_Init(hspi) != HAL_OK)
+		{
+			Error_Handler();
+		}
+		vs_ear_speaker(hspi, 0x01);
+		vs_deselect_control();
+		vs_select_data();
 }
 
 

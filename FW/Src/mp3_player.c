@@ -36,16 +36,16 @@ void vsmp3_init(void *vparameters)
 	configASSERT(qlist);
 	
 	/* create task command queue */
-	qlist->blink  = xQueueCreate(3, sizeof(struct mp3p_cmd));
-	qlist->vs10xx = xQueueCreate(3, sizeof(struct mp3p_cmd));
-	qlist->sdcard = xQueueCreate(3, sizeof(struct mp3p_cmd));
+	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	
 	
 	/* create blink tasks */
 	xstatus = 	xTaskCreate(vtask_blink, 
 													"blink", 
 													TASK_BLINK_STACK_SIZE, 
-													qlist, 					/* command queue to blink task */
+													qlist, 			/* command queue to blink task */
 													TASK_BLINK_PRIORITY, 
 													NULL);
 	configASSERT(xstatus == pdPASS);
@@ -54,7 +54,7 @@ void vsmp3_init(void *vparameters)
 	xstatus = 	xTaskCreate(vtask_controller,
 													"controller",
 													TASK_CONTROLLER_STACK_SIZE,
-													qlist,								/* list of command queues to each tasks */				
+													qlist,		/* list of command queues to each tasks */				
 													TASK_CONTROLLER_PRIORITY, 
 													NULL);
 	configASSERT(xstatus == pdPASS);
@@ -113,6 +113,7 @@ void vtask_controller(void* vparameters)
 	buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
 	configASSERT(buff);
 	lwrb_init(&sbuff->lwrb, buff, STREAM_BUFF_SIZE);
+	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
 	
 	/* main loop */
 	for(;;) {
@@ -144,11 +145,22 @@ void vtask_blink(void* vparameters)
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct mp3p_cmd						blink_cmd;
 	BaseType_t 								xstatus;
+	BaseType_t 								delay_ms = 500;    /*if no command is send ever */
 	
 	/* main loop */
 	for(;;) {
-		xQueueReceive(qlist->blink, &blink_cmd, portMAX_DELAY);
-		debug_print("cmd: %02x, arg: %02x\r\n", blink_cmd.cmd, blink_cmd.arg);
+		/* don't wait for command */
+		xstatus = xQueueReceive(qlist->blink, &blink_cmd, 0);	
+		/* new command is available */
+		if (xstatus == pdPASS) {		
+			debug_print("cmd: %02x, arg: %02x\r\n", blink_cmd.cmd, blink_cmd.arg);
+			if (blink_cmd.cmd == CMD_LED_BLINK_SET && blink_cmd.arg != 0) {
+				delay_ms = blink_cmd.arg;
+			}
+		} /* if (xstatus == pdPASS) */
+		
+		vTaskDelay(pdMS_TO_TICKS(delay_ms));
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	} /* for(;;) */
 }
 
@@ -174,11 +186,51 @@ void vtask_sdcard(void* vparameters)
 {	
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct mp3p_cmd 					sd_cmd;
+	struct stream_buff*				sbuff;
+	FIL*											file;
+	lwrb_t*										lwrb;
+	FRESULT										result;
+	uint32_t 									read_len;
+	void*											buff;
+	size_t 										len;		
 	
 	/* main loop */
 	for(;;) {
+		/* wait for command queue */
 		xQueueReceive(qlist->sdcard, &sd_cmd, portMAX_DELAY);
 		debug_print("cmd: %02x, arg: %p\r\n", sd_cmd.cmd, (void *) sd_cmd.arg);
+		
+		sbuff = (struct stream_buff *)sd_cmd.arg;
+		switch(sd_cmd.cmd) {
+			case CMD_SDCARD_START_READ:		/* file and lwrb are valid */
+				file = &sbuff->file;
+				lwrb = &sbuff->lwrb;
+			break;
+					
+			case CMD_SDCARD_CONT_READ:		/* only lwrb is valid */
+				/* if end of file is reached we can't read more data */
+				if (f_eof(file)) {		
+					continue;
+				} else {
+					lwrb = &sbuff->lwrb;
+					break;
+				}
+								
+			case CMD_SDCARD_STOP_READ:		/* file and lwrb are valid */
+			/* end of streaming */
+				f_close(&sbuff->file);
+				lwrb_reset(&sbuff->lwrb);
+			continue;
+		} /* switch(sd_cmd.cmd) */
+		
+		/* writing data to stream buffer (keep it full) */
+		len = lwrb_get_linear_block_write_length (lwrb);
+		buff = lwrb_get_linear_block_write_address(lwrb);
+		result = f_read(file, buff, len, &read_len);
+		if (result == FR_OK) {
+			lwrb_advance(lwrb, read_len);
+			debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
+		} 
 	} /* for(;;) */
 }
 /* end of file */

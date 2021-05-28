@@ -83,12 +83,10 @@ enum {
 };
 
 /* constants and macro */
-#define STREAM_BUFF_SIZE			512
+#define STREAM_BUFF_SIZE			513
 #define STREAM_BUFF_HALF_SIZE	(STREAM_BUFF_SIZE)/2
 
 /*debug macro */
-#define DEBUG 1
-
 #if defined( DEBUG ) 
 	#define debug_print(fmt, args...) 	printf("DEBUG: %s:%d:%s(): " fmt, \
     __FILE__, __LINE__, __func__, ##args)

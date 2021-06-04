@@ -96,7 +96,9 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceEnable(TRC_START);
+#endif
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -121,9 +123,9 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  //MX_FREERTOS_Init();
+  MX_FREERTOS_Init();
   /* Start scheduler */
-  //osKernelStart();
+  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */

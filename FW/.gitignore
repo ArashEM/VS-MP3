@@ -1,2 +1,13 @@
+# uVision build
 MDK-ARM/MP3P/
+
+# User-specific uVision files
+MDK-ARM/*.opt
+MDK-ARM/*.uvopt
+MDK-ARM/*.uvoptx
+MDK-ARM/*.uvgui
+MDK-ARM/*.uvgui.*
+MDK-ARM/*.uvguix.*
+
+# Makefile build 
 build/

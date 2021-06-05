@@ -21,23 +21,24 @@
 #include "vs10xx.h"
 
 /* Global variable */
-struct controller_qlist*	qlist;			/* queue list for all tasks */
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
+traceString 							sd_chn, vs_chn;				
 
 /**
  * \brief initilize mp3-player and creat related tasks  	
  */
 void vsmp3_init(void *vparameters)
 {
-	BaseType_t				xstatus;
+	BaseType_t									xstatus;
+	struct controller_qlist*		qlist;			/* queue list for all tasks */
 	
 	qlist = 
 	(struct controller_qlist* )pvPortMalloc(sizeof(struct controller_qlist));
 	configASSERT(qlist);
 	
 	/* create task command queue */
-	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->blink  = xQueueCreate(1, sizeof(struct mp3p_cmd));
 	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	
@@ -93,6 +94,9 @@ void vsmp3_init(void *vparameters)
 	/* init vs1063 */
 	vs_setup(&hspi1);
 	
+	sd_chn = xTraceRegisterString("sdcard");
+	vs_chn = xTraceRegisterString("vs10xx");
+	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
@@ -114,7 +118,7 @@ void vtask_controller(void* vparameters)
 	/* initlizie file and stream buffer */
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
-	result = f_open(&sbuff->file, "Timber.mp3", FA_READ);
+	result = f_open(&sbuff->file, "Love.mp3", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
@@ -127,12 +131,12 @@ void vtask_controller(void* vparameters)
 	/* create SD card data stream buffer */
 	qcmd.cmd = CMD_SDCARD_START_READ;
 	qcmd.arg = (uintptr_t) sbuff;
-	xQueueSend(qlist->sdcard, &qcmd, 0);
+	xQueueSend(pqlist->sdcard, &qcmd, 0);
 	
 	/* start playing mp3 file */
 	qcmd.cmd = CMD_VS10XX_PLAY;
 	qcmd.arg = (uintptr_t) sbuff;
-	xQueueSend(qlist->vs10xx, &qcmd, 0);
+	xQueueSend(pqlist->vs10xx, &qcmd, 0);
 	
 	/* start playing mp3 file */
 	qcmd.cmd = CMD_LED_BLINK_SET;
@@ -159,7 +163,7 @@ void vtask_blink(void* vparameters)
 	/* main loop */
 	for(;;) {
 		/* don't wait for command */
-		xstatus = xQueueReceive(qlist->blink, &blink_cmd, 0);	
+		xstatus = xQueueReceive(pqlist->blink, &blink_cmd, 0);	
 		/* new command is available */
 		if (xstatus == pdPASS) {		
 			debug_print("cmd: %02x, arg: %02x\r\n", blink_cmd.cmd, blink_cmd.arg);
@@ -185,14 +189,15 @@ void vtask_vs10xx(void* vparameters)
 	BaseType_t 								xstatus;
 	static BaseType_t					vs_status;
 	void*											buff;
+	size_t										len;
 	
 	/* main loop */
 	for(;;) {
 		/* don't wait for command */
-		xstatus = xQueueReceive(qlist->vs10xx, &vs10xx_cmd, 0);
+		xstatus = xQueueReceive(pqlist->vs10xx, &vs10xx_cmd, 0);
 		if (xstatus == pdPASS) {
-			debug_print("cmd: %02x, arg: %p\r\n", vs10xx_cmd.cmd 
-																					,	(void *) vs10xx_cmd.arg);
+		//debug_print("cmd: %02x, arg: %p\r\n", vs10xx_cmd.cmd 
+		//																		,	(void *) vs10xx_cmd.arg);
 			sbuff = (struct stream_buff *)vs10xx_cmd.arg;
 			switch (vs10xx_cmd.cmd) {
 				case CMD_VS10XX_PLAY:
@@ -219,12 +224,14 @@ void vtask_vs10xx(void* vparameters)
 			buff = lwrb_get_linear_block_read_address(lwrb);
 			HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, 32 , 0xFFFF);
 			lwrb_skip(lwrb, 32);
+			vTracePrintF(vs_chn,"lwrb-full: %d", lwrb_get_full(lwrb));
+			vTracePrintF(vs_chn,"lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
 			
 			if (lwrb_get_full(lwrb) < STREAM_BUFF_HALF_SIZE ) {
 				/* we need more data in stream buffer */
 				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
 				sd_cmd.arg = (uintptr_t) sbuff;
-				xQueueSend(qlist->sdcard, &sd_cmd, 0);
+				xQueueSend(pqlist->sdcard, &sd_cmd, 0);
 			} /* if (lwrb_get_full(lwrb) >= STREAM_BUFF_HALF_SIZE ) */
 		} /* if (vs_status == 0x01) */			
 	} /* for(;;) */
@@ -248,7 +255,7 @@ void vtask_sdcard(void* vparameters)
 	/* main loop */
 	for(;;) {
 		/* wait for command queue */
-		xQueueReceive(qlist->sdcard, &sd_cmd, portMAX_DELAY);
+		xQueueReceive(pqlist->sdcard, &sd_cmd, portMAX_DELAY);
 		//debug_print("cmd: %02x, arg: %p\r\n", sd_cmd.cmd, (void *) sd_cmd.arg);
 		
 		sbuff = (struct stream_buff *)sd_cmd.arg;
@@ -275,12 +282,15 @@ void vtask_sdcard(void* vparameters)
 		} /* switch(sd_cmd.cmd) */
 		
 		/* writing data to stream buffer (keep it full) */
-		len = lwrb_get_linear_block_write_length (lwrb);
+		len = lwrb_get_linear_block_write_length(lwrb);
 		buff = lwrb_get_linear_block_write_address(lwrb);
 		result = f_read(file, buff, len, &read_len);
 		if (result == FR_OK) {
 			lwrb_advance(lwrb, read_len);
 			//debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
+			vTracePrintF(sd_chn, "len: %d, read_len: %d",len, read_len);
+			vTracePrintF(sd_chn, "lwrb-full: %d", lwrb_get_full(lwrb));
+			vTracePrintF(sd_chn, "lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
 		} 
 	} /* for(;;) */
 }

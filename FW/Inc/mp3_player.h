@@ -79,19 +79,19 @@ enum {
   TASK_SDCARD_STACK_SIZE     = configMINIMAL_STACK_SIZE,
   TASK_VS10XX_STACK_SIZE     = configMINIMAL_STACK_SIZE,
   TASK_LCD_STACK_SIZE        = configMINIMAL_STACK_SIZE,
-  TASK_CONTROLLER_STACK_SIZE = configMINIMAL_STACK_SIZE,
+  TASK_CONTROLLER_STACK_SIZE = configMINIMAL_STACK_SIZE * 2,
 };
 
 /* constants and macro */
 #define STREAM_BUFF_SIZE			1025
-#define STREAM_BUFF_HALF_SIZE	128
+#define STREAM_BUFF_HALF_SIZE	257
 
 /*debug macro */
 #if defined( DEBUG ) 
 	#define debug_print(fmt, args...) 	printf("DEBUG: %s:%d:%s(): " fmt, \
     __FILE__, __LINE__, __func__, ##args)
 #else
-	#define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+	#define debug_print(fmt, args...) /* Don't do anything in release builds */
 #endif
 
 #endif /* MP3_PLAYER_H */

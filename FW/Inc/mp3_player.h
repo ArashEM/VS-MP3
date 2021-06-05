@@ -43,8 +43,9 @@ struct controller_qlist {
 };
 
 struct stream_buff {
-	FIL			file;  /* FatFS file object to be streamed */ 
-	lwrb_t	lwrb; /* Ring Buffer for holding streamed data */
+	FIL							file;  		/* FatFS file object to be streamed */ 
+	lwrb_t					lwrb; 		/* Ring Buffer for holding streamed data */
+	QueueHandle_t		qwrite;		/* queue handle for write tasks */
 };
 
 /* internal commands (used for cmd) */
@@ -93,5 +94,17 @@ enum {
 #else
 	#define debug_print(fmt, args...) /* Don't do anything in release builds */
 #endif
+
+/**
+ * container_of - cast a member of a structure out to the containing structure
+ * @ptr:	the pointer to the member.
+ * @type:	the type of the container struct this is embedded in.
+ * @member:	the name of the member within the struct.
+ *
+ */
+#define container_of(ptr, type, member)	\
+	((type *)((char *)(ptr) - offsetof(type, member)));
+
+
 
 #endif /* MP3_PLAYER_H */

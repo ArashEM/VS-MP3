@@ -118,13 +118,15 @@ void vtask_controller(void* vparameters)
 	/* initlizie file and stream buffer */
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
-	result = f_open(&sbuff->file, "Love.mp3", FA_READ);
+	sbuff->qwrite = pqlist->sdcard;
+	result = f_open(&sbuff->file, "Poker.mp3", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
 	buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
 	configASSERT(buff);
 	lwrb_init(&sbuff->lwrb, buff, STREAM_BUFF_SIZE);
+	lwrb_set_evt_fn(&sbuff->lwrb, sd_buff_evt_fn);
 	
 	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
 	
@@ -183,13 +185,12 @@ void vtask_blink(void* vparameters)
 void vtask_vs10xx(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
-	struct mp3p_cmd 					vs10xx_cmd, sd_cmd;
+	struct mp3p_cmd 					vs10xx_cmd;
 	lwrb_t*										lwrb;
 	struct stream_buff*				sbuff;
 	BaseType_t 								xstatus;
 	static BaseType_t					vs_status;
 	void*											buff;
-	size_t										len;
 	
 	/* main loop */
 	for(;;) {
@@ -216,23 +217,17 @@ void vtask_vs10xx(void* vparameters)
 		
 		/* playing */
 		if (vs_status == 0x01) {
-			if (HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) != GPIO_PIN_SET) {
+			/* on DREQ rising edge, it can accept at last 32 byte of data */
+			if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) == GPIO_PIN_SET) {
+				buff = lwrb_get_linear_block_read_address(lwrb);
+				HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, 32 , 0xFFFF);
+				lwrb_skip(lwrb, 32);
+				//vTracePrintF(vs_chn,"lwrb-full: %d", lwrb_get_linear_block_read_length(lwrb));
+				//vTracePrintF(vs_chn,"lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);			
+			} else {
 				/* wait for DREQ */
 				xSemaphoreTake(dreq_sem, portMAX_DELAY);
-			}
-			/* on DREQ rising edge, it can accept at last 32 byte of data */
-			buff = lwrb_get_linear_block_read_address(lwrb);
-			HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, 32 , 0xFFFF);
-			lwrb_skip(lwrb, 32);
-			vTracePrintF(vs_chn,"lwrb-full: %d", lwrb_get_full(lwrb));
-			vTracePrintF(vs_chn,"lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
-			
-			if (lwrb_get_full(lwrb) < STREAM_BUFF_HALF_SIZE ) {
-				/* we need more data in stream buffer */
-				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
-				sd_cmd.arg = (uintptr_t) sbuff;
-				xQueueSend(pqlist->sdcard, &sd_cmd, 0);
-			} /* if (lwrb_get_full(lwrb) >= STREAM_BUFF_HALF_SIZE ) */
+			} /* if(dreq == 1) */
 		} /* if (vs_status == 0x01) */			
 	} /* for(;;) */
 }
@@ -288,10 +283,41 @@ void vtask_sdcard(void* vparameters)
 		if (result == FR_OK) {
 			lwrb_advance(lwrb, read_len);
 			//debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
-			vTracePrintF(sd_chn, "len: %d, read_len: %d",len, read_len);
-			vTracePrintF(sd_chn, "lwrb-full: %d", lwrb_get_full(lwrb));
-			vTracePrintF(sd_chn, "lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
+			//vTracePrintF(sd_chn, "len: %d, read_len: %d",len, read_len);
+			//vTracePrintF(sd_chn, "lwrb-full: %d", lwrb_get_full(lwrb));
+			//vTracePrintF(sd_chn, "lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
 		} 
 	} /* for(;;) */
+}
+
+/**
+ * \brief           Buffer event function
+ */
+static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {	
+	struct stream_buff*		sbuff;
+	struct mp3p_cmd 			sd_cmd;
+	
+	sbuff = container_of(buff, struct stream_buff, lwrb);
+	
+	switch (type) {
+		case LWRB_EVT_RESET:
+			break;
+		
+		case LWRB_EVT_READ:
+			vTracePrintF(sd_chn, "[EVT] Buffer read event: %d byte(s)!\r\n", (int)len);
+			if (lwrb_get_linear_block_read_length(buff) < STREAM_BUFF_HALF_SIZE ) {
+				/* we need more data in stream buffer */
+				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
+				sd_cmd.arg = (uintptr_t) sbuff;
+				xQueueSend(sbuff->qwrite, &sd_cmd, 0);
+			}	 /* if (lwrb_get_full(lwrb) >= STREAM_BUFF_HALF_SIZE ) */
+		break;
+    
+		case LWRB_EVT_WRITE:
+			vTracePrintF(sd_chn, "[EVT] Buffer write event: %d byte(s)!\r\n", (int)len);
+		break;
+    
+		default: break;
+	}
 }
 /* end of file */

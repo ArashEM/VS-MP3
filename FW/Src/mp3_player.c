@@ -119,7 +119,7 @@ void vtask_controller(void* vparameters)
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
 	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "Poker.mp3", FA_READ);
+	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
@@ -191,6 +191,7 @@ void vtask_vs10xx(void* vparameters)
 	BaseType_t 								xstatus;
 	static BaseType_t					vs_status;
 	void*											buff;
+	size_t										len;
 	
 	/* main loop */
 	for(;;) {
@@ -219,11 +220,14 @@ void vtask_vs10xx(void* vparameters)
 		if (vs_status == 0x01) {
 			/* on DREQ rising edge, it can accept at last 32 byte of data */
 			if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) == GPIO_PIN_SET) {
+				len = lwrb_get_linear_block_read_length(lwrb);
 				buff = lwrb_get_linear_block_read_address(lwrb);
-				HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, 32 , 0xFFFF);
-				lwrb_skip(lwrb, 32);
-				//vTracePrintF(vs_chn,"lwrb-full: %d", lwrb_get_linear_block_read_length(lwrb));
-				//vTracePrintF(vs_chn,"lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);			
+				/* only 32 byte can be transfered */
+				if(len >= 32) { 
+					len = 32;
+				}	
+				HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, len , 0xFFFF);
+				lwrb_skip(lwrb, len);
 			} else {
 				/* wait for DREQ */
 				xSemaphoreTake(dreq_sem, portMAX_DELAY);
@@ -282,10 +286,6 @@ void vtask_sdcard(void* vparameters)
 		result = f_read(file, buff, len, &read_len);
 		if (result == FR_OK) {
 			lwrb_advance(lwrb, read_len);
-			//debug_print("write %d bytes @ %p\r\n", read_len, (void *)buff);
-			//vTracePrintF(sd_chn, "len: %d, read_len: %d",len, read_len);
-			//vTracePrintF(sd_chn, "lwrb-full: %d", lwrb_get_full(lwrb));
-			//vTracePrintF(sd_chn, "lwrb->r: %d, lwrb->w: %d", lwrb->r, lwrb->w);
 		} 
 	} /* for(;;) */
 }
@@ -305,12 +305,12 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 		
 		case LWRB_EVT_READ:
 			vTracePrintF(sd_chn, "[EVT] Buffer read event: %d byte(s)!\r\n", (int)len);
-			if (lwrb_get_linear_block_read_length(buff) < STREAM_BUFF_HALF_SIZE ) {
+			if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) {
 				/* we need more data in stream buffer */
 				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
 				sd_cmd.arg = (uintptr_t) sbuff;
 				xQueueSend(sbuff->qwrite, &sd_cmd, 0);
-			}	 /* if (lwrb_get_full(lwrb) >= STREAM_BUFF_HALF_SIZE ) */
+			}	 /* if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) */
 		break;
     
 		case LWRB_EVT_WRITE:

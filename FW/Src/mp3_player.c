@@ -320,4 +320,19 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 		default: break;
 	}
 }
+
+/**
+  * @brief  EXTI line detection callbacks.
+  * @param  GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	portBASE_TYPE taskWoken = pdFALSE;
+	/* DREQ falling edge */
+	if(GPIO_Pin == DREQ_Pin) {
+		xSemaphoreGiveFromISR(dreq_sem, &taskWoken); 
+		portEND_SWITCHING_ISR(taskWoken);
+	}
+}
 /* end of file */

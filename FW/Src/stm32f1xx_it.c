@@ -24,8 +24,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "cmsis_os.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +60,6 @@ extern PCD_HandleTypeDef hpcd_USB_FS;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
-extern SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -167,9 +164,7 @@ void DebugMon_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
-	portBASE_TYPE taskWoken = pdFALSE;
-	xSemaphoreGiveFromISR(dreq_sem, &taskWoken); 
-	portEND_SWITCHING_ISR(taskWoken);
+
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */

@@ -87,14 +87,6 @@ enum {
 #define STREAM_BUFF_SIZE			1536
 #define STREAM_BUFF_HALF_SIZE	512
 
-/*debug macro */
-#if defined( DEBUG ) 
-	#define debug_print(fmt, args...) 	printf("DEBUG: %s:%d:%s(): " fmt, \
-    __FILE__, __LINE__, __func__, ##args)
-#else
-	#define debug_print(fmt, args...) /* Don't do anything in release builds */
-#endif
-
 /**
  * container_of - cast a member of a structure out to the containing structure
  * @ptr:	the pointer to the member.

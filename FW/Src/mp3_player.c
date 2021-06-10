@@ -19,11 +19,12 @@
 #include "mp3_player.h"
 #include "GUI.h"
 #include "vs10xx.h"
+#include "debug.h"
 
 /* Global variable */
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
-traceString 							sd_chn, vs_chn;				
+traceString 							sd_chn, vs_chn;	
 
 /**
  * \brief initilize mp3-player and creat related tasks  	
@@ -112,14 +113,14 @@ void vtask_controller(void* vparameters)
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct mp3p_cmd						qcmd;
 	struct stream_buff*				sbuff;
-	uint8_t*									buff;
 	FRESULT										result;
+	uint8_t*									buff;
 	
 	/* initlizie file and stream buffer */
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
 	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "Poker.mp3", FA_READ);
+	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
@@ -220,13 +221,16 @@ void vtask_vs10xx(void* vparameters)
 		if (vs_status == 0x01) {
 			/* on DREQ rising edge, it can accept at last 32 byte of data */
 			if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) == GPIO_PIN_SET) {
-				len = lwrb_get_linear_block_read_length(lwrb);
+				len  = lwrb_get_linear_block_read_length(lwrb);
 				buff = lwrb_get_linear_block_read_address(lwrb);
 				/* only 32 byte can be transfered */
 				if(len >= 32) { 
 					len = 32;
 				}	
-				HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, len , 0xFFFF);
+				MEASURE_EXEC_TIME(
+					HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, len, HAL_MAX_DELAY), 
+					BL_PWM_GPIO_Port,
+					BL_PWM_Pin);
 				lwrb_skip(lwrb, len);
 			} else {
 				/* wait for DREQ */
@@ -248,8 +252,8 @@ void vtask_sdcard(void* vparameters)
 	lwrb_t*										lwrb;
 	FRESULT										result;
 	uint32_t 									read_len;
-	void*											buff;
-	size_t 										len;		
+	void*											buff;		
+	size_t										len;
 	
 	/* main loop */
 	for(;;) {
@@ -283,7 +287,11 @@ void vtask_sdcard(void* vparameters)
 		/* writing data to stream buffer (keep it full) */
 		len = lwrb_get_linear_block_write_length(lwrb);
 		buff = lwrb_get_linear_block_write_address(lwrb);
-		result = f_read(file, buff, len, &read_len);
+		MEASURE_EXEC_TIME(
+			result = f_read(file, buff, len, &read_len),
+			LCD_CS_GPIO_Port,
+			LCD_CS_Pin);
+			
 		if (result == FR_OK) {
 			lwrb_advance(lwrb, read_len);
 		} 
@@ -309,7 +317,7 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 				/* we need more data in stream buffer */
 				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
 				sd_cmd.arg = (uintptr_t) sbuff;
-				xQueueSend(sbuff->qwrite, &sd_cmd, 0);
+				xQueueSendFromISR(sbuff->qwrite, &sd_cmd, 0);
 			}	 /* if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) */
 		break;
     
@@ -335,4 +343,5 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		portEND_SWITCHING_ISR(taskWoken);
 	}
 }
+
 /* end of file */

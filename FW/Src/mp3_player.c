@@ -119,7 +119,7 @@ void vtask_controller(void* vparameters)
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
 	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
+	result = f_open(&sbuff->file, "Poker.mp3", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
@@ -304,7 +304,7 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 			break;
 		
 		case LWRB_EVT_READ:
-			vTracePrintF(sd_chn, "[EVT] Buffer read event: %d byte(s)!\r\n", (int)len);
+			//vTracePrintF(sd_chn, "Buffer read event: %d byte(s)!\r\n", (int)len);
 			if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) {
 				/* we need more data in stream buffer */
 				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
@@ -314,7 +314,7 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 		break;
     
 		case LWRB_EVT_WRITE:
-			vTracePrintF(sd_chn, "[EVT] Buffer write event: %d byte(s)!\r\n", (int)len);
+			//vTracePrintF(sd_chn, "Buffer write event: %d byte(s)!\r\n", (int)len);
 		break;
     
 		default: break;

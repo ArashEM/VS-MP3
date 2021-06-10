@@ -11,3 +11,6 @@ MDK-ARM/*.uvguix.*
 
 # Makefile build 
 build/
+
+# Trace Recorder Library for Tracealyzer v4.4.2
+Middlewares/Third_Party/TraceRecorder

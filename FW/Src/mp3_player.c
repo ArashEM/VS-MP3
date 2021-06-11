@@ -24,6 +24,7 @@
 /* Global variable */
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
+SemaphoreHandle_t					spi_tx_dma_sem;	
 traceString 							sd_chn, vs_chn;	
 
 /**
@@ -87,6 +88,10 @@ void vsmp3_init(void *vparameters)
 	dreq_sem = xSemaphoreCreateBinary();
 	configASSERT(dreq_sem);
 	
+	/* create binary semaphore for SPI-TX DAM transfer complete */
+	spi_tx_dma_sem = xSemaphoreCreateBinary();
+	configASSERT(spi_tx_dma_sem);
+	
 	/* mount SD card */
 	if (f_mount(&fs,"", 0	) != FR_OK) {
 		debug_print("f_mount failed\r\n");
@@ -120,7 +125,7 @@ void vtask_controller(void* vparameters)
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
 	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
+	result = f_open(&sbuff->file, "LONE.flac", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
@@ -228,9 +233,11 @@ void vtask_vs10xx(void* vparameters)
 					len = 32;
 				}	
 				MEASURE_EXEC_TIME(
-					HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, len, HAL_MAX_DELAY), 
+					HAL_SPI_Transmit_DMA(&hspi1, (uint8_t* )buff, len), 
 					BL_PWM_GPIO_Port,
 					BL_PWM_Pin);
+				/* wait for transfer completion */
+				xSemaphoreTake(spi_tx_dma_sem, portMAX_DELAY);
 				lwrb_skip(lwrb, len);
 			} else {
 				/* wait for DREQ */
@@ -344,4 +351,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	}
 }
 
+/**
+  * @brief  Tx Transfer completed callback.
+  * @param  hspi pointer to a SPI_HandleTypeDef structure that contains
+  *               the configuration information for SPI module.
+  * @retval None
+  */
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	portBASE_TYPE taskWoken = pdFALSE;
+  if(hspi == &hspi1) {
+		xSemaphoreGiveFromISR(spi_tx_dma_sem, &taskWoken); 
+		portEND_SWITCHING_ISR(taskWoken);
+	}
+}
 /* end of file */

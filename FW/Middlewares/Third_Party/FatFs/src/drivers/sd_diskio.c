@@ -47,10 +47,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "ff_gen_drv.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "debug.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+static SemaphoreHandle_t		sdio_rx_dma_sem;
+#if (configUSE_TRACE_FACILITY == 1)	
+traceHandle 							sdio_dma_handle;
+#endif
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
 
@@ -90,13 +97,27 @@ DSTATUS SD_initialize(BYTE lun)
 {
   Stat = STA_NOINIT;
   
-  /* Configure the uSD device */
-  if(BSP_SD_Init() == MSD_OK)
-  {
-    Stat &= ~STA_NOINIT;
-  }
-
-  return Stat;
+	if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+		/* Configure the uSD device */
+		if(BSP_SD_Init() == MSD_OK)
+		{
+			Stat &= ~STA_NOINIT;
+		}
+	
+		/*
+		* if the SD is correctly initialized, create semaphore
+		*/
+		if(Stat != STA_NOINIT) {
+			sdio_rx_dma_sem = xSemaphoreCreateBinary();
+			configASSERT(sdio_rx_dma_sem);
+#if (configUSE_TRACE_FACILITY == 1)
+			vTraceSetSemaphoreName(sdio_rx_dma_sem, "sdio_rx_dma_sem");
+			sdio_dma_handle = xTraceSetISRProperties("sdio-dma-isr", 
+																		NVIC_GetPriority(SDIO_IRQn));
+#endif
+		}
+	}
+	return Stat;
 }
 
 /**
@@ -129,21 +150,20 @@ DRESULT SD_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
   DRESULT res = RES_ERROR;
   uint32_t timeout = 100000;
 
-  if(BSP_SD_ReadBlocks((uint32_t*)buff, 
-                       (uint32_t) (sector), 
-                       count, SD_DATATIMEOUT) == MSD_OK)
+  if(BSP_SD_ReadBlocks_DMA((uint32_t*)buff, 
+													(uint32_t) (sector), 
+													count) == MSD_OK)
   {
-    while(BSP_SD_GetCardState()!= MSD_OK)
-    {
-      if (timeout-- == 0)
-      {
-        return RES_ERROR;
-      }
-    }
-    res = RES_OK;
-  }
-  
-  return res;
+		/* wait for SDIO read transfer completion */ 
+		xSemaphoreTake(sdio_rx_dma_sem, portMAX_DELAY);
+		while(BSP_SD_GetCardState()!= MSD_OK) {
+			if (timeout-- == 0) {
+				return RES_ERROR;
+			}
+		}
+		res = RES_OK;		
+	}
+	return res;
 }
 
 /**
@@ -228,6 +248,24 @@ DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
   return res;
 }
 #endif /* _USE_IOCTL == 1 */
+
+/**
+  * @brief BSP Rx Transfer completed callback
+  * @retval None
+  * @note empty (up to the user to fill it in or to remove it if useless)
+  */
+void BSP_SD_ReadCpltCallback(void)
+{
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISRBegin(sdio_dma_handle);
+#endif
+	portBASE_TYPE taskWoken = pdFALSE;
+	xSemaphoreGiveFromISR(sdio_rx_dma_sem, &taskWoken); 
+	portEND_SWITCHING_ISR(taskWoken);
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISREnd(0);
+#endif
+}
   
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

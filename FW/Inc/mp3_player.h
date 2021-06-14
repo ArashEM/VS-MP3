@@ -84,8 +84,8 @@ enum {
 };
 
 /* constants and macro */
-#define STREAM_BUFF_SIZE			1536
-#define STREAM_BUFF_HALF_SIZE	512
+#define STREAM_BUFF_SIZE			4096
+#define STREAM_BUFF_HALF_SIZE	( STREAM_BUFF_SIZE ) / 2
 
 /**
  * container_of - cast a member of a structure out to the containing structure

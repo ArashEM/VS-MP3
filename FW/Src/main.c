@@ -116,6 +116,7 @@ int main(void)
   MX_CRC_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 	/* Init the STemWin GUI Library */
   GUI_Init();
 	/* Activate the use of memory device feature */

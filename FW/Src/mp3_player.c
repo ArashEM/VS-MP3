@@ -25,7 +25,12 @@
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 SemaphoreHandle_t					spi_tx_dma_sem;	
+uint8_t										buff[STREAM_BUFF_SIZE];
+
+#if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
+traceHandle 							dreq_handle, spi_dma_handle;
+#endif
 
 /**
  * \brief initilize mp3-player and creat related tasks  	
@@ -43,7 +48,6 @@ void vsmp3_init(void *vparameters)
 	qlist->blink  = xQueueCreate(1, sizeof(struct mp3p_cmd));
 	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
-	
 	
 	/* create blink tasks */
 	xstatus = 	xTaskCreate(vtask_blink, 
@@ -87,7 +91,7 @@ void vsmp3_init(void *vparameters)
 	/* create binary semaphore for VS10xx DREQ interrup */
 	dreq_sem = xSemaphoreCreateBinary();
 	configASSERT(dreq_sem);
-	
+
 	/* create binary semaphore for SPI-TX DAM transfer complete */
 	spi_tx_dma_sem = xSemaphoreCreateBinary();
 	configASSERT(spi_tx_dma_sem);
@@ -100,8 +104,26 @@ void vsmp3_init(void *vparameters)
 	/* init vs1063 */
 	vs_setup(&hspi1);
 	
+#if (configUSE_TRACE_FACILITY == 1)
+	/* set queue name */
+	vTraceSetQueueName(qlist->blink, "q-blink");
+	vTraceSetQueueName(qlist->vs10xx, "q-vs10xx");
+	vTraceSetQueueName(qlist->sdcard, "q-sdcard");
+	
+	/* set semaphore name */
+	vTraceSetSemaphoreName(dreq_sem, "dreq-sem");
+	vTraceSetSemaphoreName(spi_tx_dma_sem, "spi-tx-dma-sem");
+	
+	/* set channel name */
 	sd_chn = xTraceRegisterString("sdcard");
 	vs_chn = xTraceRegisterString("vs10xx");
+	
+	/*set ISR name */
+	dreq_handle = xTraceSetISRProperties("dreq-isr",
+																				NVIC_GetPriority(DREQ_EXTI_IRQn));
+	spi_dma_handle = xTraceSetISRProperties("spi-dma-isr", 
+																		NVIC_GetPriority(DMA1_Channel3_IRQn));
+#endif
 	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -119,17 +141,17 @@ void vtask_controller(void* vparameters)
 	struct mp3p_cmd						qcmd;
 	struct stream_buff*				sbuff;
 	FRESULT										result;
-	uint8_t*									buff;
+	//uint8_t*									buff;
 	
 	/* initlizie file and stream buffer */
 	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
 	configASSERT(sbuff);
 	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "LONE.flac", FA_READ);
+	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
 	configASSERT(result == FR_OK);
 	
 	/* initlizie lwrb */
-	buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
+	//buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
 	configASSERT(buff);
 	lwrb_init(&sbuff->lwrb, buff, STREAM_BUFF_SIZE);
 	lwrb_set_evt_fn(&sbuff->lwrb, sd_buff_evt_fn);
@@ -231,13 +253,14 @@ void vtask_vs10xx(void* vparameters)
 				/* only 32 byte can be transfered */
 				if(len >= 32) { 
 					len = 32;
-				}	
-				MEASURE_EXEC_TIME(
-					HAL_SPI_Transmit_DMA(&hspi1, (uint8_t* )buff, len), 
-					BL_PWM_GPIO_Port,
-					BL_PWM_Pin);
-				/* wait for transfer completion */
-				xSemaphoreTake(spi_tx_dma_sem, portMAX_DELAY);
+				}
+				// ToDo: Check return value
+				HAL_SPI_Transmit(&hspi1, (uint8_t* )buff, len, HAL_MAX_DELAY);
+				//if ( HAL_SPI_Transmit_DMA(&hspi1, (uint8_t* )buff, len) != HAL_OK) {
+				//	continue;
+				//}
+				///* wait for transfer completion */
+				//xSemaphoreTake(spi_tx_dma_sem, portMAX_DELAY);
 				lwrb_skip(lwrb, len);
 			} else {
 				/* wait for DREQ */
@@ -257,7 +280,6 @@ void vtask_sdcard(void* vparameters)
 	struct stream_buff*				sbuff;
 	FIL*											file;
 	lwrb_t*										lwrb;
-	FRESULT										result;
 	uint32_t 									read_len;
 	void*											buff;		
 	size_t										len;
@@ -293,13 +315,8 @@ void vtask_sdcard(void* vparameters)
 		
 		/* writing data to stream buffer (keep it full) */
 		len = lwrb_get_linear_block_write_length(lwrb);
-		buff = lwrb_get_linear_block_write_address(lwrb);
-		MEASURE_EXEC_TIME(
-			result = f_read(file, buff, len, &read_len),
-			LCD_CS_GPIO_Port,
-			LCD_CS_Pin);
-			
-		if (result == FR_OK) {
+		buff = lwrb_get_linear_block_write_address(lwrb);	
+		if (f_read(file, buff, len, &read_len) == FR_OK) {
 			lwrb_advance(lwrb, read_len);
 		} 
 	} /* for(;;) */
@@ -319,17 +336,17 @@ static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 			break;
 		
 		case LWRB_EVT_READ:
-			//vTracePrintF(sd_chn, "Buffer read event: %d byte(s)!\r\n", (int)len);
+			vTracePrintF(sd_chn, "Buffer read event: %d byte(s)!\r\n", (int)len);
 			if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) {
 				/* we need more data in stream buffer */
 				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
 				sd_cmd.arg = (uintptr_t) sbuff;
-				xQueueSendFromISR(sbuff->qwrite, &sd_cmd, 0);
+				xQueueSend(sbuff->qwrite, &sd_cmd, 0);
 			}	 /* if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) */
 		break;
     
 		case LWRB_EVT_WRITE:
-			//vTracePrintF(sd_chn, "Buffer write event: %d byte(s)!\r\n", (int)len);
+			vTracePrintF(sd_chn, "Buffer write event: %d byte(s)!\r\n", (int)len);
 		break;
     
 		default: break;
@@ -345,10 +362,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	portBASE_TYPE taskWoken = pdFALSE;
 	/* DREQ falling edge */
-	if(GPIO_Pin == DREQ_Pin) {
-		xSemaphoreGiveFromISR(dreq_sem, &taskWoken); 
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISRBegin(dreq_handle);
+#endif
+	if(GPIO_Pin == DREQ_Pin) {	
+		xSemaphoreGiveFromISR(dreq_sem, &taskWoken); 	
 		portEND_SWITCHING_ISR(taskWoken);
 	}
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISREnd(0);
+#endif
 }
 
 /**
@@ -360,9 +383,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
 	portBASE_TYPE taskWoken = pdFALSE;
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISRBegin(spi_dma_handle); 
+#endif
   if(hspi == &hspi1) {
-		xSemaphoreGiveFromISR(spi_tx_dma_sem, &taskWoken); 
+		xSemaphoreGiveFromISR(spi_tx_dma_sem, &taskWoken);	
 		portEND_SWITCHING_ISR(taskWoken);
 	}
+#if (configUSE_TRACE_FACILITY == 1)
+	vTraceStoreISREnd(0);
+#endif
 }
 /* end of file */

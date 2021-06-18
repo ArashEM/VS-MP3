@@ -139,8 +139,8 @@ void stop_playing(struct stream_buff* sbuff, struct controller_qlist* qlist)
 	xQueueSend(qlist->vs10xx, &qcmd, 0);
 	
 	/* blink while playing */
-	qcmd.cmd = CMD_LED_BLINK_SET;
-	qcmd.arg = portMAX_DELAY;
+	qcmd.cmd = CMD_LED_BLINK_OFF;
+	qcmd.arg = 0;
 	xQueueSend(qlist->blink, &qcmd, 0);
 	
 	debug_print("stop playing\r\n");

@@ -45,7 +45,7 @@ void vsmp3_init(void *vparameters)
 	configASSERT(qlist);
 	
 	/* create task command queue */
-	qlist->blink  = xQueueCreate(1, sizeof(struct mp3p_cmd));
+	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	
@@ -150,10 +150,9 @@ void vtask_controller(void* vparameters)
 	/* main loop */
 	for(;;) {
 		start_playing(sbuff, pqlist, "SUBEM.mp3");
-		while(!is_eof(sbuff)) {
-			vTaskDelay(pdMS_TO_TICKS(500));
-		}
+		vTaskDelay(pdMS_TO_TICKS(10000));
 		stop_playing(sbuff, pqlist);
+		vTaskDelay(pdMS_TO_TICKS(2000));
 		start_playing(sbuff, pqlist, "Love.mp3");
 		vTaskDelay(pdMS_TO_TICKS(10000));
 		stop_playing(sbuff, pqlist);
@@ -169,21 +168,31 @@ void vtask_blink(void* vparameters)
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct mp3p_cmd						blink_cmd;
 	BaseType_t 								xstatus;
-	BaseType_t 								delay_ms = 500;    /*if no command is send ever */
+	TickType_t								queue_wait = portMAX_DELAY;
+	BaseType_t 								blink_wait = 500;    /*if no command is send ever */
 	
 	/* main loop */
 	for(;;) {
 		/* don't wait for command */
-		xstatus = xQueueReceive(pqlist->blink, &blink_cmd, 0);	
+		xstatus = xQueueReceive(pqlist->blink, &blink_cmd, queue_wait);	
 		/* new command is available */
 		if (xstatus == pdPASS) {		
 			debug_print("cmd: %02x, arg: %02x\r\n", blink_cmd.cmd, blink_cmd.arg);
-			if (blink_cmd.cmd == CMD_LED_BLINK_SET && blink_cmd.arg != 0) {
-				delay_ms = blink_cmd.arg;
-			}
+			switch(blink_cmd.cmd) {
+				case CMD_LED_BLINK_SET:
+					if(blink_cmd.arg != 0) {
+						blink_wait = blink_cmd.arg;
+						queue_wait = 0;
+					}
+				break;
+				case CMD_LED_BLINK_OFF:
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+					queue_wait = portMAX_DELAY;
+				continue;
+			} /*switch(blink_cmd.cmd)*/
 		} /* if (xstatus == pdPASS) */
 		
-		vTaskDelay(pdMS_TO_TICKS(delay_ms));
+		vTaskDelay(pdMS_TO_TICKS(blink_wait));
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	} /* for(;;) */
 }
@@ -218,10 +227,11 @@ void vtask_vs10xx(void* vparameters)
 				
 				case CMD_VS10XX_STOP:
 					vs_status = 0x00;
-					break;
+				//ToDo: cancel/end current play (to avoid glitch)
+				break;
 				
 				default:
-					break; 
+				break; 
 			} /* switch (vs10xx_cmd.cmd) */
 		} /* if (xstatus == pdPASS) */
 		

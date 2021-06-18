@@ -51,6 +51,7 @@ enum {
 	/* general commands */
 	CMD_NOPE,
 	CMD_LED_BLINK_SET,      		/* arg is value for blink delay in mS */
+	CMD_LED_BLINK_OFF,					/* are is not used */
 	
 	/* vs10xx related commands */
 	CMD_VS10XX_PLAY,						/* arg is pointer to struct stream_buff */		

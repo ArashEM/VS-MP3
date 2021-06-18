@@ -20,12 +20,12 @@
 #include "GUI.h"
 #include "vs10xx.h"
 #include "debug.h"
+#include "helper.h"
 
 /* Global variable */
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 SemaphoreHandle_t					spi_tx_dma_sem;	
-uint8_t										buff[STREAM_BUFF_SIZE];
 
 #if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
@@ -125,6 +125,9 @@ void vsmp3_init(void *vparameters)
 																		NVIC_GetPriority(DMA1_Channel3_IRQn));
 #endif
 	
+	/* check remained heap */
+	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
+	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
@@ -138,44 +141,22 @@ void vsmp3_init(void *vparameters)
 void vtask_controller(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
-	struct mp3p_cmd						qcmd;
 	struct stream_buff*				sbuff;
-	FRESULT										result;
-	//uint8_t*									buff;
 	
 	/* initlizie file and stream buffer */
-	sbuff = (struct stream_buff *)pvPortMalloc(sizeof(struct stream_buff));
+	sbuff = sbuff_alloc(pqlist->sdcard);
 	configASSERT(sbuff);
-	sbuff->qwrite = pqlist->sdcard;
-	result = f_open(&sbuff->file, "ALAN.flac", FA_READ);
-	configASSERT(result == FR_OK);
-	
-	/* initlizie lwrb */
-	//buff  = (uint8_t *)pvPortMalloc(STREAM_BUFF_SIZE);
-	configASSERT(buff);
-	lwrb_init(&sbuff->lwrb, buff, STREAM_BUFF_SIZE);
-	lwrb_set_evt_fn(&sbuff->lwrb, sd_buff_evt_fn);
-	
-	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
-	
-	/* create SD card data stream buffer */
-	qcmd.cmd = CMD_SDCARD_START_READ;
-	qcmd.arg = (uintptr_t) sbuff;
-	xQueueSend(pqlist->sdcard, &qcmd, 0);
-	
-	/* start playing mp3 file */
-	qcmd.cmd = CMD_VS10XX_PLAY;
-	qcmd.arg = (uintptr_t) sbuff;
-	xQueueSend(pqlist->vs10xx, &qcmd, 0);
-	
-	/* start playing mp3 file */
-	qcmd.cmd = CMD_LED_BLINK_SET;
-	qcmd.arg = 1000;
-	xQueueSend(pqlist->blink, &qcmd, 0);
 	
 	/* main loop */
 	for(;;) {
+		start_playing(sbuff, pqlist, "SUBEM.mp3");
+		while(!is_eof(sbuff)) {
+			vTaskDelay(pdMS_TO_TICKS(500));
+		}
+		stop_playing(sbuff, pqlist);
+		start_playing(sbuff, pqlist, "Love.mp3");
 		vTaskDelay(pdMS_TO_TICKS(10000));
+		stop_playing(sbuff, pqlist);
 	} /* for(;;) */
 }
 
@@ -320,37 +301,6 @@ void vtask_sdcard(void* vparameters)
 			lwrb_advance(lwrb, read_len);
 		} 
 	} /* for(;;) */
-}
-
-/**
- * \brief           Buffer event function
- */
-static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {	
-	struct stream_buff*		sbuff;
-	struct mp3p_cmd 			sd_cmd;
-	
-	sbuff = container_of(buff, struct stream_buff, lwrb);
-	
-	switch (type) {
-		case LWRB_EVT_RESET:
-			break;
-		
-		case LWRB_EVT_READ:
-			vTracePrintF(sd_chn, "Buffer read event: %d byte(s)!\r\n", (int)len);
-			if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) {
-				/* we need more data in stream buffer */
-				sd_cmd.cmd = CMD_SDCARD_CONT_READ;
-				sd_cmd.arg = (uintptr_t) sbuff;
-				xQueueSend(sbuff->qwrite, &sd_cmd, 0);
-			}	 /* if (lwrb_get_full(buff) < STREAM_BUFF_HALF_SIZE ) */
-		break;
-    
-		case LWRB_EVT_WRITE:
-			vTracePrintF(sd_chn, "Buffer write event: %d byte(s)!\r\n", (int)len);
-		break;
-    
-		default: break;
-	}
 }
 
 /**

@@ -23,8 +23,6 @@ void vtask_sdcard(void* vparameters);
 void vtask_controller(void* vparameters);
 void vtask_blink(void* vparameters);
 
-static void sd_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len);
-
 /**
  * \brief mp3 player command 
  */

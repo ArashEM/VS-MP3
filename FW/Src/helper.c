@@ -128,6 +128,9 @@ void stop_playing(struct stream_buff* sbuff, struct controller_qlist* qlist)
 	configASSERT(sbuff);
 	configASSERT(qlist);
 	
+	/* close file*/
+	f_close(&sbuff->file);
+	
 	/* create SD card data stream buffer */
 	qcmd.cmd = CMD_SDCARD_STOP_READ;
 	qcmd.arg = (uintptr_t) sbuff;

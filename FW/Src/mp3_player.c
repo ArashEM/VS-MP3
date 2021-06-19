@@ -142,19 +142,33 @@ void vtask_controller(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct stream_buff*				sbuff;
+	FRESULT										result;
+	DIR 											dir;
+	static FILINFO 						fno;
 	
 	/* initlizie file and stream buffer */
 	sbuff = sbuff_alloc(pqlist->sdcard);
 	configASSERT(sbuff);
 	
+	result = f_opendir(&dir, (char *)"/");
+	configASSERT(result == FR_OK);
+	
 	/* main loop */
 	for(;;) {
-		start_playing(sbuff, pqlist, "SUBEM.mp3");
-		vTaskDelay(pdMS_TO_TICKS(10000));
-		stop_playing(sbuff, pqlist);
-		vTaskDelay(pdMS_TO_TICKS(2000));
-		start_playing(sbuff, pqlist, "Love.mp3");
-		vTaskDelay(pdMS_TO_TICKS(10000));
+		result = f_readdir(&dir, &fno);			/* Read a directory item */
+		if (result != FR_OK || fno.fname[0] == 0) {
+			debug_print("f_readdir():%d\r\n",result);
+			continue;  	/* Break on error or end of dir */
+		}
+		if (fno.fattrib & AM_DIR) {
+			continue;
+		}
+		
+		/* play */
+		start_playing(sbuff, pqlist, fno.fname);
+		while(!is_eof(sbuff)) {
+			vTaskDelay(pdMS_TO_TICKS(500));
+		}
 		stop_playing(sbuff, pqlist);
 	} /* for(;;) */
 }

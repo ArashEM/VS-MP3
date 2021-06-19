@@ -801,6 +801,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\mp3_player.c</FilePath>
             </File>
+            <File>
+              <FileName>helper.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\helper.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

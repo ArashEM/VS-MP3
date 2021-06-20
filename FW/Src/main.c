@@ -117,11 +117,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
-	/* Init the STemWin GUI Library */
-  GUI_Init();
-	/* Activate the use of memory device feature */
-  WM_SetCreateFlags(WM_CF_MEMDEV);
-	show_banner();
 	vsmp3_init(NULL);
   /* USER CODE END 2 */
 

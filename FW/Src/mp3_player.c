@@ -16,8 +16,9 @@
 
 /* General headers */
 #include <stdint.h>
-#include "mp3_player.h"
 #include "GUI.h"
+#include "WM.h"
+#include "mp3_player.h"
 #include "vs10xx.h"
 #include "debug.h"
 #include "helper.h"
@@ -26,6 +27,8 @@
 FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 SemaphoreHandle_t					spi_tx_dma_sem;	
+static FILINFO 						fno;				// ToDo: don't use global!
+extern GUI_CONST_STORAGE GUI_BITMAP bmowl;
 
 #if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
@@ -84,6 +87,16 @@ void vsmp3_init(void *vparameters)
 													TASK_SDCARD_PRIORITY,
 													NULL);
 	configASSERT(xstatus == pdPASS);
+	
+	/* create HDMI controller task */
+	xstatus = 	xTaskCreate(vtask_hmi,
+													"hmi",
+													TASK_HMI_STACK_SIZE,
+													qlist,
+													TASK_HMI_PRIORITY,
+													NULL);
+	configASSERT(xstatus == pdPASS);
+	
 	
 	/* debug */
 	debug_print("task creation done\r\n");
@@ -144,7 +157,6 @@ void vtask_controller(void* vparameters)
 	struct stream_buff*				sbuff;
 	FRESULT										result;
 	DIR 											dir;
-	static FILINFO 						fno;
 	
 	/* initlizie file and stream buffer */
 	sbuff = sbuff_alloc(pqlist->sdcard);
@@ -173,6 +185,7 @@ void vtask_controller(void* vparameters)
 		}
 		
 		/* play */
+		// ToDo: Check file name ends with '.mp3'
 		start_playing(sbuff, pqlist, fno.fname);
 		while(!is_eof(sbuff)) {
 			vTaskDelay(pdMS_TO_TICKS(500));
@@ -332,6 +345,41 @@ void vtask_sdcard(void* vparameters)
 		if (f_read(file, buff, len, &read_len) == FR_OK) {
 			lwrb_advance(lwrb, read_len);
 		} 
+	} /* for(;;) */
+}
+
+/**
+ * HMI controller 
+ */
+void vtask_hmi(void* vparameters)
+{
+	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
+	char 											message[30];
+	uint32_t									index;
+	
+	/* Init the STemWin GUI Library */
+  GUI_Init();
+	/* Activate the use of memory device feature */
+  WM_SetCreateFlags(WM_CF_MEMDEV);
+	/* show banner */
+	GUI_SetBkColor(GUI_WHITE);
+  GUI_Clear();
+  GUI_DrawBitmap(&bmowl, 70, 30);
+	GUI_SetColor(GUI_BLACK);
+  GUI_SetFont(&GUI_Font16_ASCII);
+	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
+	sprintf(message,"Built on %s: %s",__DATE__, __TIME__);
+	GUI_DispStringAt(message, 120, 0);
+	
+	
+	/* main loop*/
+	for(;;) {
+		GUI_DispDecAt( index++, 10,220,4);
+		GUI_DispStringAtCEOL(fno.fname, 160, 220);
+		if (index > 9999) {
+			index = 0;
+		}
+		vTaskDelay(pdMS_TO_TICKS(1000));
 	} /* for(;;) */
 }
 

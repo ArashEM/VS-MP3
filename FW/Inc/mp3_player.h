@@ -22,6 +22,7 @@ void vtask_vs10xx(void* vparameters);
 void vtask_sdcard(void* vparameters);
 void vtask_controller(void* vparameters);
 void vtask_blink(void* vparameters);
+void vtask_hmi(void* vparameters);
 
 /**
  * \brief mp3 player command 
@@ -69,7 +70,7 @@ enum {
 	TASK_BLINK_PRIORITY      = tskIDLE_PRIORITY,
 	TASK_SDCARD_PRIORITY     = tskIDLE_PRIORITY + 3,
 	TASK_VS10XX_PRIORITY     = tskIDLE_PRIORITY + 2,
-	TASK_LCD_PRIORITY        = tskIDLE_PRIORITY + 1,
+	TASK_HMI_PRIORITY        = tskIDLE_PRIORITY + 1,
 	TASK_CONTROLLER_PRIORITY = tskIDLE_PRIORITY + 4,
 };
 
@@ -78,7 +79,7 @@ enum {
 	TASK_BLINK_STACK_SIZE      = configMINIMAL_STACK_SIZE,
   TASK_SDCARD_STACK_SIZE     = configMINIMAL_STACK_SIZE,
   TASK_VS10XX_STACK_SIZE     = configMINIMAL_STACK_SIZE,
-  TASK_LCD_STACK_SIZE        = configMINIMAL_STACK_SIZE,
+  TASK_HMI_STACK_SIZE        = configMINIMAL_STACK_SIZE,
   TASK_CONTROLLER_STACK_SIZE = configMINIMAL_STACK_SIZE * 3,
 };
 

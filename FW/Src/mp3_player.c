@@ -155,11 +155,19 @@ void vtask_controller(void* vparameters)
 	
 	/* main loop */
 	for(;;) {
-		result = f_readdir(&dir, &fno);			/* Read a directory item */
-		if (result != FR_OK || fno.fname[0] == 0) {
+		/* Read a directory item */
+		result = f_readdir(&dir, &fno);			
+		if (result != FR_OK) { 
+			/* Break on error or end of dir */
 			debug_print("f_readdir():%d\r\n",result);
-			continue;  	/* Break on error or end of dir */
+			continue;  	
+		} else if (fno.fname[0] == 0) {	
+			/* end of DIR files */
+			f_closedir(&dir);
+			configASSERT(f_opendir(&dir, (char *)"/") == FR_OK);
+			continue;
 		}
+		/* don't go inside dirs */
 		if (fno.fattrib & AM_DIR) {
 			continue;
 		}

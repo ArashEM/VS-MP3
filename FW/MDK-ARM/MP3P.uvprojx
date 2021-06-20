@@ -371,9 +371,9 @@
             <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F103xE,LCD_ILI9340,DEBUG</Define>
+              <Define>USE_HAL_DRIVER,STM32F103xE,LCD_ILI9340,DEBUG,TRACE_FACILITY=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;    ../Drivers/STM32F1xx_HAL_Driver/Inc;    ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;    ../Middlewares/Third_Party/FatFs/src/drivers;    ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;    ../Middlewares/Third_Party/FatFs/src;    ../Drivers/CMSIS/Include;    ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;    ../Middlewares/Third_Party/FreeRTOS/Source/include;    ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;    ../Middlewares/Third_Party/STemWin/inc;    ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;    ../Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc;    ../Middlewares/Third_Party/TraceRecorder/config;    ../Middlewares/Third_Party/TraceRecorder/include;    ../Middlewares/Third_Party/lwrb/lwrb/src/include</IncludePath>
+              <IncludePath>../Inc;     ../Drivers/STM32F1xx_HAL_Driver/Inc;     ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;     ../Middlewares/Third_Party/FatFs/src/drivers;     ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;     ../Middlewares/Third_Party/FatFs/src;     ../Drivers/CMSIS/Include;     ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;     ../Middlewares/Third_Party/FreeRTOS/Source/include;     ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;     ../Middlewares/Third_Party/STemWin/inc;     ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;     ../Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc;     ../Middlewares/Third_Party/TraceRecorder/config;     ../Middlewares/Third_Party/TraceRecorder/include;     ../Middlewares/Third_Party/lwrb/lwrb/src/include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

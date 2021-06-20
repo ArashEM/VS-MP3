@@ -354,7 +354,7 @@ void vtask_sdcard(void* vparameters)
 void vtask_hmi(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
-	char 											message[30];
+	char 											message[40];
 	uint32_t									index;
 	
 	/* Init the STemWin GUI Library */

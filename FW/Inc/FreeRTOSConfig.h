@@ -63,7 +63,7 @@
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
 #define configTOTAL_HEAP_SIZE                    ((size_t)6144)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
-#define configUSE_TRACE_FACILITY                 1
+#define configUSE_TRACE_FACILITY                 TRACE_FACILITY
 #define configUSE_16_BIT_TICKS                   0
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
@@ -118,7 +118,7 @@ header file. */
 		printf("configASSERT: %s:%d:%s\r\n",__FILE__, __LINE__, __func__); \
 		for( ;; ); } 
 #else
-		configASSERT( x ) if ((x) == 0) { taskDISABLE_INTERRUPTS(); for( ;; ); } 
+#define configASSERT( x ) if ((x) == 0) {taskDISABLE_INTERRUPTS(); for( ;; );} 
 #endif
 /* USER CODE END 1 */
 

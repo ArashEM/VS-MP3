@@ -4,8 +4,6 @@
 
 `VS1063` is an audio encoder/decoder from [VLSI solution](http://www.vlsi.fi/en/home.html). Base on VS1063 and STM32F1X, I'd designed a simple MP3 player. 
 
-![MP3P-ON](DOC/Pictures/vs-mp3-on.jpg)
-
 ![MP3P-OFF](DOC/Pictures/vs-mp3.jpg)
 
 # Specification

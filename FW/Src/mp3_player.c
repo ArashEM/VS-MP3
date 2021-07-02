@@ -24,7 +24,6 @@
 #include "helper.h"
 
 /* Global variable */
-FATFS 										fs;  				/* FS object for SD card logical drive */
 SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
 SemaphoreHandle_t					spi_tx_dma_sem;	
 static FILINFO 						fno;				// ToDo: don't use global!
@@ -41,6 +40,7 @@ traceHandle 							dreq_handle, spi_dma_handle;
 void vsmp3_init(void *vparameters)
 {
 	BaseType_t									xstatus;
+	FATFS* 											fs;  				/* FS object for SD card logical drive */
 	struct controller_qlist*		qlist;			/* queue list for all tasks */
 	
 	qlist = 
@@ -110,7 +110,9 @@ void vsmp3_init(void *vparameters)
 	configASSERT(spi_tx_dma_sem);
 	
 	/* mount SD card */
-	if (f_mount(&fs,"", 0	) != FR_OK) {
+	fs = (FATFS *)pvPortMalloc(sizeof(FATFS));
+	configASSERT(fs);
+	if (f_mount(fs,"", 0) != FR_OK) {
 		debug_print("f_mount failed\r\n");
 	}
 	
@@ -349,7 +351,7 @@ void vtask_sdcard(void* vparameters)
 }
 
 /**
- * HMI controller 
+ * \breif HMI controller 
  */
 void vtask_hmi(void* vparameters)
 {
@@ -364,7 +366,7 @@ void vtask_hmi(void* vparameters)
 	/* show banner */
 	GUI_SetBkColor(GUI_WHITE);
   GUI_Clear();
-  GUI_DrawBitmap(&bmowl, 70, 30);
+  //GUI_DrawBitmap(&bmowl, 70, 30);
 	GUI_SetColor(GUI_BLACK);
   GUI_SetFont(&GUI_Font16_ASCII);
 	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
@@ -383,45 +385,5 @@ void vtask_hmi(void* vparameters)
 	} /* for(;;) */
 }
 
-/**
-  * @brief  EXTI line detection callbacks.
-  * @param  GPIO_Pin: Specifies the pins connected EXTI line
-  * @retval None
-  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	portBASE_TYPE taskWoken = pdFALSE;
-	/* DREQ falling edge */
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISRBegin(dreq_handle);
-#endif
-	if(GPIO_Pin == DREQ_Pin) {	
-		xSemaphoreGiveFromISR(dreq_sem, &taskWoken); 	
-		portEND_SWITCHING_ISR(taskWoken);
-	}
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISREnd(0);
-#endif
-}
 
-/**
-  * @brief  Tx Transfer completed callback.
-  * @param  hspi pointer to a SPI_HandleTypeDef structure that contains
-  *               the configuration information for SPI module.
-  * @retval None
-  */
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-	portBASE_TYPE taskWoken = pdFALSE;
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISRBegin(spi_dma_handle); 
-#endif
-  if(hspi == &hspi1) {
-		xSemaphoreGiveFromISR(spi_tx_dma_sem, &taskWoken);	
-		portEND_SWITCHING_ISR(taskWoken);
-	}
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISREnd(0);
-#endif
-}
 /* end of file */

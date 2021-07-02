@@ -54,7 +54,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static SemaphoreHandle_t		sdio_rx_dma_sem;
+SemaphoreHandle_t		sdio_rx_dma_sem;
 #if (configUSE_TRACE_FACILITY == 1)	
 traceHandle 							sdio_dma_handle;
 #endif
@@ -248,24 +248,5 @@ DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
   return res;
 }
 #endif /* _USE_IOCTL == 1 */
-
-/**
-  * @brief BSP Rx Transfer completed callback
-  * @retval None
-  * @note empty (up to the user to fill it in or to remove it if useless)
-  */
-void BSP_SD_ReadCpltCallback(void)
-{
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISRBegin(sdio_dma_handle);
-#endif
-	portBASE_TYPE taskWoken = pdFALSE;
-	xSemaphoreGiveFromISR(sdio_rx_dma_sem, &taskWoken); 
-	portEND_SWITCHING_ISR(taskWoken);
-#if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISREnd(0);
-#endif
-}
-  
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

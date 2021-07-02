@@ -17,3 +17,6 @@ HeaderFiles=gpio.h;FreeRTOSConfig.h;adc.h;crc.h;dac.h;dma.h;ffconf.h;bsp_driver_
 SourcePath=E:/Research/ARM/MP3-Player/Software/VS-MP3/FW/Src
 SourceFiles=gpio.c;freertos.c;adc.c;crc.c;dac.c;dma.c;bsp_driver_sd.c;fatfs.c;fatfs_platform.c;i2c.c;sdio.c;spi.c;usart.c;usb_device.c;usbd_conf.c;usbd_desc.c;usbd_storage_if.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;stm32f1xx_hal_timebase_tim.c;main.c;
 
+[]
+SourceFiles=;;
+

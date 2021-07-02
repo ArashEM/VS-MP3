@@ -64,10 +64,13 @@ void Error_Handler(void);
 #define ADC_BAT_GPIO_Port GPIOC
 #define KEY1_Pin GPIO_PIN_1
 #define KEY1_GPIO_Port GPIOC
+#define KEY1_EXTI_IRQn EXTI1_IRQn
 #define KEY2_Pin GPIO_PIN_2
 #define KEY2_GPIO_Port GPIOC
+#define KEY2_EXTI_IRQn EXTI2_IRQn
 #define KEY3_Pin GPIO_PIN_3
 #define KEY3_GPIO_Port GPIOC
+#define KEY3_EXTI_IRQn EXTI3_IRQn
 #define KEY4_Pin GPIO_PIN_0
 #define KEY4_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_1

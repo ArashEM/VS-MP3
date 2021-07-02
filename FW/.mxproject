@@ -11,12 +11,12 @@ SourceFiles=Src\main.c;Src\gpio.c;Src\freertos.c;Src\adc.c;Src\crc.c;Src\dac.c;S
 HeaderPath=Drivers\STM32F1xx_HAL_Driver\Inc;Drivers\STM32F1xx_HAL_Driver\Inc\Legacy;Middlewares\Third_Party\FreeRTOS\Source\include;Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS;Middlewares\Third_Party\FreeRTOS\Source\portable\GCC\ARM_CM3;Middlewares\Third_Party\FatFs\src;Middlewares\Third_Party\FatFs\src\drivers;Middlewares\ST\STM32_USB_Device_Library\Core\Inc;Middlewares\ST\STM32_USB_Device_Library\Class\MSC\Inc;Drivers\CMSIS\Device\ST\STM32F1xx\Include;Drivers\CMSIS\Include;Inc;
 CDefines=USE_HAL_DRIVER;STM32F103xE;USE_HAL_DRIVER;USE_HAL_DRIVER;
 
+[]
+SourceFiles=;;
+
 [PreviousGenFiles]
 HeaderPath=E:/Research/ARM/MP3-Player/Software/VS-MP3/FW/Inc
 HeaderFiles=gpio.h;FreeRTOSConfig.h;adc.h;crc.h;dac.h;dma.h;ffconf.h;bsp_driver_sd.h;fatfs.h;fatfs_platform.h;i2c.h;sdio.h;spi.h;usart.h;usb_device.h;usbd_conf.h;usbd_desc.h;usbd_storage_if.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
 SourcePath=E:/Research/ARM/MP3-Player/Software/VS-MP3/FW/Src
 SourceFiles=gpio.c;freertos.c;adc.c;crc.c;dac.c;dma.c;bsp_driver_sd.c;fatfs.c;fatfs_platform.c;i2c.c;sdio.c;spi.c;usart.c;usb_device.c;usbd_conf.c;usbd_desc.c;usbd_storage_if.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;stm32f1xx_hal_timebase_tim.c;main.c;
-
-[]
-SourceFiles=;;
 

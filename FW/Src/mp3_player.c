@@ -366,7 +366,7 @@ void vtask_hmi(void* vparameters)
 	/* show banner */
 	GUI_SetBkColor(GUI_WHITE);
   GUI_Clear();
-  //GUI_DrawBitmap(&bmowl, 70, 30);
+  GUI_DrawBitmap(&bmowl, 70, 30);
 	GUI_SetColor(GUI_BLACK);
   GUI_SetFont(&GUI_Font16_ASCII);
 	GUI_DispStringAt("VS-MP3 player ...", 0, 0);

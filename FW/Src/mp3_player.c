@@ -9,6 +9,7 @@
 #include "queue.h"
 #include "semphr.h"
 #include "cmsis_os.h"
+#include "timers.h"
 
 /* HAL headers */
 #include "main.h"
@@ -26,6 +27,7 @@
 /* Global variable */
 SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
 													spi_tx_dma_sem;		/* spi1_tx DMA compelete */
+TimerHandle_t							bl_tim;						/* backlight timer handle */
 
 static FILINFO 						fno;				// ToDo: don't use global!
 
@@ -47,6 +49,15 @@ void vsmp3_init(void *vparameters)
 	
 	/* create tasks */
 	vsmp3_create_tasks(qlist);
+	
+	/* create backlight timer */
+	bl_tim = xTimerCreate("backlight", 
+												pdMS_TO_TICKS(10000), 
+												pdFALSE, 
+												0, 
+												vtimer_backlight);
+	configASSERT(bl_tim);
+	xTimerStart(bl_tim, portMAX_DELAY);
 	
 	/* debug */
 	debug_print("task creation done\r\n");
@@ -338,4 +349,13 @@ void vtask_hmi(void* vparameters)
 }
 
 
+
+/**
+ * \brief Backlight callback
+ */
+void vtimer_backlight(TimerHandle_t xTimer)
+{
+	/* when expire, turn off backlight */
+	HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_RESET);
+}
 /* end of file */

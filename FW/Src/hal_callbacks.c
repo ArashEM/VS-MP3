@@ -8,6 +8,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "timers.h"
 
 /* HAL headers */
 #include "main.h"
@@ -21,6 +22,8 @@
 extern SemaphoreHandle_t			dreq_sem, 
 															spi_tx_dma_sem, 
 															sdio_rx_dma_sem;
+
+extern TimerHandle_t					bl_tim;						/* backlight timer handle */
 
 #if (configUSE_TRACE_FACILITY == 1)
 extern traceHandle 						dreq_handle, 
@@ -51,7 +54,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case KEY1_Pin:
 		case KEY2_Pin:
 		case KEY3_Pin:
-			debug_print("%d\r\n",GPIO_Pin);
+			/* power of Backlight */
+			HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
+			/* reset backlight timer */
+			xTimerResetFromISR(bl_tim,&taskWoken);
+			portEND_SWITCHING_ISR(taskWoken);
 		break;
 		
 		default:

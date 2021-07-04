@@ -10,6 +10,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 
 /* General headers */
 #include <stdint.h>
@@ -23,6 +24,8 @@ void vtask_sdcard(void* vparameters);
 void vtask_controller(void* vparameters);
 void vtask_blink(void* vparameters);
 void vtask_hmi(void* vparameters);
+
+void vtimer_backlight(TimerHandle_t xTimer);
 
 /**
  * \brief mp3 player command 

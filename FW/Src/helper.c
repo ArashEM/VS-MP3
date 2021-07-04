@@ -149,4 +149,79 @@ void stop_playing(struct stream_buff* sbuff, struct controller_qlist* qlist)
 	debug_print("stop playing\r\n");
 }
 		
+
+/**
+ * \brief create MP3 player command queue 
+ */
+struct controller_qlist* vsmp3_create_queues(void)
+{
+	struct controller_qlist*		qlist;			/* queue list for all tasks */
+	
+	qlist = 
+	(struct controller_qlist* )pvPortMalloc(sizeof(struct controller_qlist));
+	configASSERT(qlist);
+	
+	/* create task command queue */
+	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	
+	return qlist;
+}
+
+/**
+ * \brief create MP3 player tasks
+ */
+void vsmp3_create_tasks(struct controller_qlist* qlist)
+{
+	BaseType_t									xstatus;
+	
+	configASSERT(qlist);
+	
+	/* create blink tasks */
+	xstatus = 	xTaskCreate(vtask_blink, 
+													"blink", 
+													TASK_BLINK_STACK_SIZE, 
+													qlist, 			/* command queue to blink task */
+													TASK_BLINK_PRIORITY, 
+													NULL);
+	configASSERT(xstatus == pdPASS);
+	
+	/* create controller task */
+	xstatus = 	xTaskCreate(vtask_controller,
+													"controller",
+													TASK_CONTROLLER_STACK_SIZE,
+													qlist,		/* list of command queues to each tasks */				
+													TASK_CONTROLLER_PRIORITY, 
+													NULL);
+	configASSERT(xstatus == pdPASS);
+	
+	/* create vs10xx task */
+	xstatus = 	xTaskCreate(vtask_vs10xx,
+													"vs10xx",
+													TASK_VS10XX_STACK_SIZE,
+													qlist,
+													TASK_VS10XX_PRIORITY,
+													NULL);
+	configASSERT(xstatus == pdPASS);
+	
+	/* create sdcard streaming buffer task */
+	xstatus = 	xTaskCreate(vtask_sdcard,
+													"sdcard",
+													TASK_SDCARD_STACK_SIZE,
+													qlist,
+													TASK_SDCARD_PRIORITY,
+													NULL);
+	configASSERT(xstatus == pdPASS);
+	
+	/* create HDMI controller task */
+	xstatus = 	xTaskCreate(vtask_hmi,
+													"hmi",
+													TASK_HMI_STACK_SIZE,
+													qlist,
+													TASK_HMI_PRIORITY,
+													NULL);
+	configASSERT(xstatus == pdPASS);
+}
+
 /* EOF */

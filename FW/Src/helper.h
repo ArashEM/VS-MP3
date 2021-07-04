@@ -27,6 +27,10 @@ void start_playing(	struct stream_buff* sbuff,
 										const char* file);
 void stop_playing(	struct stream_buff* sbuff, 
 										struct controller_qlist* qlist);
+
+struct controller_qlist* vsmp3_create_queues(void);
+void vsmp3_create_tasks(struct controller_qlist* qlist);
+
 /* macro */
 #define is_eof(sbuff) f_eof(&(sbuff)->file)
 

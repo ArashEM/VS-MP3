@@ -24,10 +24,10 @@
 #include "helper.h"
 
 /* Global variable */
-SemaphoreHandle_t					dreq_sem;		/* vs10xx dreq IRQ */
-SemaphoreHandle_t					spi_tx_dma_sem;	
+SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
+													spi_tx_dma_sem;		/* spi1_tx DMA compelete */
+
 static FILINFO 						fno;				// ToDo: don't use global!
-extern GUI_CONST_STORAGE GUI_BITMAP bmowl;
 
 #if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
@@ -39,64 +39,14 @@ traceHandle 							dreq_handle, spi_dma_handle;
  */
 void vsmp3_init(void *vparameters)
 {
-	BaseType_t									xstatus;
 	FATFS* 											fs;  				/* FS object for SD card logical drive */
 	struct controller_qlist*		qlist;			/* queue list for all tasks */
 	
-	qlist = 
-	(struct controller_qlist* )pvPortMalloc(sizeof(struct controller_qlist));
-	configASSERT(qlist);
+	/* create queues */
+	qlist = vsmp3_create_queues();
 	
-	/* create task command queue */
-	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
-	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
-	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
-	
-	/* create blink tasks */
-	xstatus = 	xTaskCreate(vtask_blink, 
-													"blink", 
-													TASK_BLINK_STACK_SIZE, 
-													qlist, 			/* command queue to blink task */
-													TASK_BLINK_PRIORITY, 
-													NULL);
-	configASSERT(xstatus == pdPASS);
-	
-	/* create controller task */
-	xstatus = 	xTaskCreate(vtask_controller,
-													"controller",
-													TASK_CONTROLLER_STACK_SIZE,
-													qlist,		/* list of command queues to each tasks */				
-													TASK_CONTROLLER_PRIORITY, 
-													NULL);
-	configASSERT(xstatus == pdPASS);
-	
-	/* create vs10xx task */
-	xstatus = 	xTaskCreate(vtask_vs10xx,
-													"vs10xx",
-													TASK_VS10XX_STACK_SIZE,
-													qlist,
-													TASK_VS10XX_PRIORITY,
-													NULL);
-	configASSERT(xstatus == pdPASS);
-	
-	/* create sdcard streaming buffer task */
-	xstatus = 	xTaskCreate(vtask_sdcard,
-													"sdcard",
-													TASK_SDCARD_STACK_SIZE,
-													qlist,
-													TASK_SDCARD_PRIORITY,
-													NULL);
-	configASSERT(xstatus == pdPASS);
-	
-	/* create HDMI controller task */
-	xstatus = 	xTaskCreate(vtask_hmi,
-													"hmi",
-													TASK_HMI_STACK_SIZE,
-													qlist,
-													TASK_HMI_PRIORITY,
-													NULL);
-	configASSERT(xstatus == pdPASS);
-	
+	/* create tasks */
+	vsmp3_create_tasks(qlist);
 	
 	/* debug */
 	debug_print("task creation done\r\n");
@@ -358,6 +308,8 @@ void vtask_hmi(void* vparameters)
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	char 											message[40];
 	uint32_t									index;
+	extern GUI_CONST_STORAGE 	GUI_BITMAP bmowl;
+
 	
 	/* Init the STemWin GUI Library */
   GUI_Init();

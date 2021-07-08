@@ -89,6 +89,7 @@ enum {
 /* constants and macro */
 #define STREAM_BUFF_SIZE			4096
 #define STREAM_BUFF_HALF_SIZE	( STREAM_BUFF_SIZE ) / 2
+#define INIT_VOLUME						0x30
 
 /**
  * container_of - cast a member of a structure out to the containing structure

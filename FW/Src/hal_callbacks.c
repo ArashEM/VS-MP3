@@ -16,14 +16,17 @@
 
 /* General headers */
 #include "debug.h"
+#include "helper.h"
+#include "mp3_player.h"
 
 
 /* Global external variable */
-extern SemaphoreHandle_t			dreq_sem, 
-															spi_tx_dma_sem, 
-															sdio_rx_dma_sem;
+extern SemaphoreHandle_t				dreq_sem, 
+																spi_tx_dma_sem, 
+																sdio_rx_dma_sem;
+extern struct controller_qlist*	qlist;						/* queue list for all tasks */
 
-extern TimerHandle_t					bl_tim;						/* backlight timer handle */
+extern TimerHandle_t						bl_tim;						/* backlight timer handle */
 
 #if (configUSE_TRACE_FACILITY == 1)
 extern traceHandle 						dreq_handle, 
@@ -38,11 +41,13 @@ extern traceHandle 						dreq_handle,
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	portBASE_TYPE taskWoken = pdFALSE;
-	/* DREQ falling edge */
+	portBASE_TYPE 	taskWoken = pdFALSE;
+	static uint8_t	vol = INIT_VOLUME;
+	
 #if (configUSE_TRACE_FACILITY == 1)
 	vTraceStoreISRBegin(dreq_handle);
 #endif
+	
 	switch(GPIO_Pin) {
 		/* vs10xx request data */
 		case DREQ_Pin:
@@ -50,9 +55,28 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			portEND_SWITCHING_ISR(taskWoken);
 		break;
 		
-		/* KEY pressed */
+		/* KEY1 pressed, VOL+ */
 		case KEY1_Pin:
+			vol += 0x08;
+			set_volume(qlist, vol);
+			/* power of Backlight */
+			HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
+			/* reset backlight timer */
+			xTimerResetFromISR(bl_tim,&taskWoken);
+			portEND_SWITCHING_ISR(taskWoken);
+		break;
+		
+		/* KEY2 pressed, VOL- */
 		case KEY2_Pin:
+			vol -= 0x08;
+			set_volume(qlist, vol);
+			/* power of Backlight */
+			HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
+			/* reset backlight timer */
+			xTimerResetFromISR(bl_tim,&taskWoken);
+			portEND_SWITCHING_ISR(taskWoken);
+			break; 
+		
 		case KEY3_Pin:
 			/* power of Backlight */
 			HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
@@ -64,9 +88,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		default:
 		break;
 	} /* switch(GPIO_Pin) */
+	
 #if (configUSE_TRACE_FACILITY == 1)
 	vTraceStoreISREnd(0);
 #endif
+	
 }
 
 /**

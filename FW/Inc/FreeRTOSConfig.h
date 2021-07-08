@@ -121,7 +121,7 @@ header file. */
 #if defined( DEBUG )
 #define configASSERT( x ) if ((x) == 0) { \
 		taskDISABLE_INTERRUPTS(); \
-		printf("configASSERT: %s:%d:%s\r\n",__FILE__, __LINE__, __func__); \
+		printf("configASSERT: %s:%d:%s@%d\r\n",__FILE__, __LINE__, __func__,xTaskGetTickCount()); \
 		for( ;; ); } 
 #else
 #define configASSERT( x ) if ((x) == 0) {taskDISABLE_INTERRUPTS(); for( ;; );} 

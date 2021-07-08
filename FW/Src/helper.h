@@ -27,6 +27,7 @@ void start_playing(	struct stream_buff* sbuff,
 										const char* file);
 void stop_playing(	struct stream_buff* sbuff, 
 										struct controller_qlist* qlist);
+void set_volume(struct controller_qlist* qlist, const uint8_t vol);
 
 struct controller_qlist* vsmp3_create_queues(void);
 void vsmp3_create_tasks(struct controller_qlist* qlist);

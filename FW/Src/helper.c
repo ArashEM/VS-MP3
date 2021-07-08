@@ -149,6 +149,26 @@ void stop_playing(struct stream_buff* sbuff, struct controller_qlist* qlist)
 	debug_print("stop playing\r\n");
 }
 		
+/**
+ * \brief set sound volume 
+ */
+void set_volume(struct controller_qlist* qlist, const uint8_t vol)
+{
+	struct mp3p_cmd						qcmd;
+	portBASE_TYPE taskWoken = pdFALSE;
+	
+	/* controll input */
+	configASSERT(qlist);
+	
+	/* set voluem */
+	qcmd.cmd = CMD_VS10XX_SET_VOL;
+	qcmd.arg = (uint32_t)vol;
+	xQueueSendFromISR(qlist->vs10xx, &qcmd, &taskWoken);
+	portEND_SWITCHING_ISR(taskWoken);
+	
+	/* debug */
+	debug_print("set volume to %d\r\n",vol);
+}
 
 /**
  * \brief create MP3 player command queue 

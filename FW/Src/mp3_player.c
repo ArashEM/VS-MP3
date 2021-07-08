@@ -28,6 +28,7 @@
 SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
 													spi_tx_dma_sem;		/* spi1_tx DMA compelete */
 TimerHandle_t							bl_tim;						/* backlight timer handle */
+struct controller_qlist*	qlist;						/* queue list for all tasks */
 
 static FILINFO 						fno;				// ToDo: don't use global!
 
@@ -42,7 +43,6 @@ traceHandle 							dreq_handle, spi_dma_handle;
 void vsmp3_init(void *vparameters)
 {
 	FATFS* 											fs;  				/* FS object for SD card logical drive */
-	struct controller_qlist*		qlist;			/* queue list for all tasks */
 	
 	/* create queues */
 	qlist = vsmp3_create_queues();
@@ -208,6 +208,8 @@ void vtask_vs10xx(void* vparameters)
 	static BaseType_t					vs_status;
 	void*											buff;
 	size_t										len;
+	uint8_t										vol = INIT_VOLUME;
+	static uint32_t						vol_is_set;
 	
 	/* main loop */
 	for(;;) {
@@ -223,6 +225,11 @@ void vtask_vs10xx(void* vparameters)
 					vs_status = 0x01;
 				break;
 				
+				case CMD_VS10XX_SET_VOL:
+					vol = (uint8_t)vs10xx_cmd.arg;
+					vol_is_set = 0x00;
+				break;
+				
 				case CMD_VS10XX_STOP:
 					vs_status = 0x00;
 				//ToDo: cancel/end current play (to avoid glitch)
@@ -235,8 +242,15 @@ void vtask_vs10xx(void* vparameters)
 		
 		/* playing */
 		if (vs_status == 0x01) {
-			/* on DREQ rising edge, it can accept at last 32 byte of data */
+			/* on DREQ rising edge VS1063a can take 
+			 * at least 32 bytes of SDI data or one SCI command */
 			if(HAL_GPIO_ReadPin(VS_DREQ_PORT, VS_DREQ) == GPIO_PIN_SET) {
+				/* SCI commands */
+				if(!vol_is_set) {
+					vs_set_volume(&hspi1, vol, vol);
+					vol_is_set = 0x01;
+					continue;
+				}
 				len  = lwrb_get_linear_block_read_length(lwrb);
 				buff = lwrb_get_linear_block_read_address(lwrb);
 				/* only 32 byte can be transfered */

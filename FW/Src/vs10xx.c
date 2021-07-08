@@ -27,11 +27,12 @@ void vs_write_register_hl(SPI_HandleTypeDef *hspi, const uint8_t address, const 
 		uint8_t	buff[4] = {VS_WRITE_COMMAND, address, highbyte, lowbyte};
     vs_deselect_data();
     vs_select_control();
-    vs_wait();
+    //vs_wait();
     HAL_Delay(2);
     HAL_SPI_Transmit(hspi, buff, sizeof(buff), 0xFFFF);
     vs_deselect_control();
-    vs_wait();
+		vs_select_data();
+    //vs_wait();
 }
 
 

@@ -35,3 +35,4 @@ Here is some important notes about this project
   - `main`: MP3 player main board 
   - `dtr`: LCD and touch screen daughter board
 - `DOC`: includes general documents about this project (e.g. datasheets and ...)
+- `BOX`: includes related files for box and packaging 

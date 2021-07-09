@@ -244,4 +244,15 @@ void vsmp3_create_tasks(struct controller_qlist* qlist)
 	configASSERT(xstatus == pdPASS);
 }
 
+/**
+ *  Run time stack overflow checking is performed if
+ *  configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
+ *  called if a stack overflow is detected.
+ */
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+{
+	debug_print("stack overflow on: %s\r\n", pcTaskGetName(xTask));
+	debug_print("stack overflow on: %s\r\n", pcTaskName);
+}
+
 /* EOF */

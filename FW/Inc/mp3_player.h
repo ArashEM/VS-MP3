@@ -42,6 +42,7 @@ struct controller_qlist {
 	QueueHandle_t		blink;
 	QueueHandle_t		vs10xx;
 	QueueHandle_t		sdcard;
+	QueueHandle_t		hmi;
 };
 
 struct stream_buff {
@@ -66,6 +67,9 @@ enum {
 	CMD_SDCARD_START_READ,			/* arg is pointer to struct stream_buff */
 	CMD_SDCARD_CONT_READ,
 	CMD_SDCARD_STOP_READ,
+	
+	/* hmi related commands */
+	CMD_HMI_SHOW_FILE_NAME,			/* arg is char * which point to file name */
 };
 
 /* tasks priorities */

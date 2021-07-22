@@ -114,6 +114,11 @@ void start_playing(	struct stream_buff* sbuff,
 	qcmd.arg = 1000;
 	xQueueSend(qlist->blink, &qcmd, 0);
 	
+	/* set file name in HMI */
+	qcmd.cmd = CMD_HMI_SHOW_FILE_NAEM;
+	qcmd.arg = (uintptr_t) file;
+	xQueueSend(qlist->hmi, &qcmd, 0);
+	
 	debug_print("start playing %s\r\n",file);
 }
 
@@ -185,6 +190,7 @@ struct controller_qlist* vsmp3_create_queues(void)
 	qlist->blink  = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->vs10xx = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	qlist->sdcard = xQueueCreate(2, sizeof(struct mp3p_cmd));
+	qlist->hmi = xQueueCreate(2, sizeof(struct mp3p_cmd));
 	
 	return qlist;
 }

@@ -30,8 +30,6 @@ SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
 TimerHandle_t							bl_tim;						/* backlight timer handle */
 struct controller_qlist*	qlist;						/* queue list for all tasks */
 
-static FILINFO 						fno;				// ToDo: don't use global!
-
 #if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
 traceHandle 							dreq_handle, spi_dma_handle;
@@ -120,6 +118,7 @@ void vtask_controller(void* vparameters)
 	struct stream_buff*				sbuff;
 	FRESULT										result;
 	DIR 											dir;
+	static FILINFO 						fno;		/* valid pointer to fno.fname */			
 	
 	/* initlizie file and stream buffer */
 	sbuff = sbuff_alloc(pqlist->sdcard);
@@ -331,8 +330,11 @@ void vtask_sdcard(void* vparameters)
 void vtask_hmi(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
-	char 											message[40];
+	char 											banner[40];
+	char*											message;
 	uint32_t									index;
+	BaseType_t 								xstatus;
+	struct mp3p_cmd 					hmi_cmd;
 	extern GUI_CONST_STORAGE 	GUI_BITMAP bmowl;
 
 	
@@ -347,18 +349,27 @@ void vtask_hmi(void* vparameters)
 	GUI_SetColor(GUI_BLACK);
   GUI_SetFont(&GUI_Font16_ASCII);
 	GUI_DispStringAt("VS-MP3 player ...", 0, 0);
-	sprintf(message,"Built on %s: %s",__DATE__, __TIME__);
-	GUI_DispStringAt(message, 120, 0);
+	sprintf(banner,"Built on %s: %s",__DATE__, __TIME__);
+	GUI_DispStringAt(banner, 120, 0);
 	
 	
 	/* main loop*/
 	for(;;) {
+		/* wait 1000mS for new command */
+		xstatus = xQueueReceive(pqlist->hmi, &hmi_cmd, pdMS_TO_TICKS(1000));
+		if (xstatus == pdPASS) {
+			switch(hmi_cmd.cmd) {
+				case CMD_HMI_SHOW_FILE_NAME:
+					message = (char *)hmi_cmd.arg;
+					GUI_DispStringAtCEOL(message, 160, 220);
+					index=0;
+					break;
+				
+				default:
+					break; 
+			} /* switch(hmi_cmd.cmd) */
+		} /* if (xstatus == pdPASS) */
 		GUI_DispDecAt( index++, 10,220,4);
-		GUI_DispStringAtCEOL(fno.fname, 160, 220);
-		if (index > 9999) {
-			index = 0;
-		}
-		vTaskDelay(pdMS_TO_TICKS(1000));
 	} /* for(;;) */
 }
 

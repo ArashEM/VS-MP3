@@ -40,8 +40,6 @@ traceHandle 							dreq_handle, spi_dma_handle;
  */
 void vsmp3_init(void *vparameters)
 {
-	FATFS* 											fs;  				/* FS object for SD card logical drive */
-	
 	/* create queues */
 	qlist = vsmp3_create_queues();
 	
@@ -68,13 +66,6 @@ void vsmp3_init(void *vparameters)
 	spi_tx_dma_sem = xSemaphoreCreateBinary();
 	configASSERT(spi_tx_dma_sem);
 	
-	/* mount SD card */
-	fs = (FATFS *)pvPortMalloc(sizeof(FATFS));
-	configASSERT(fs);
-	if (f_mount(fs,"", 0) != FR_OK) {
-		debug_print("f_mount failed\r\n");
-	}
-	
 	/* init vs1063 */
 	vs_setup(&hspi1);
 	
@@ -83,6 +74,7 @@ void vsmp3_init(void *vparameters)
 	vTraceSetQueueName(qlist->blink, "q-blink");
 	vTraceSetQueueName(qlist->vs10xx, "q-vs10xx");
 	vTraceSetQueueName(qlist->sdcard, "q-sdcard");
+	vTraceSetQueueName(qlist->hmi, "q-hmi");
 	
 	/* set semaphore name */
 	vTraceSetSemaphoreName(dreq_sem, "dreq-sem");
@@ -99,9 +91,6 @@ void vsmp3_init(void *vparameters)
 																		NVIC_GetPriority(DMA1_Channel3_IRQn));
 #endif
 	
-	/* check remained heap */
-	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
-	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
@@ -116,13 +105,24 @@ void vtask_controller(void* vparameters)
 {
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	struct stream_buff*				sbuff;
+	FATFS* 										fs;  				/* FS object for SD card logical drive */
 	FRESULT										result;
 	DIR 											dir;
-	static FILINFO 						fno;		/* valid pointer to fno.fname */			
+	static FILINFO 						fno;				/* valid pointer to fno.fname */			
+	
+	/* mount SD card */
+	fs = (FATFS *)pvPortMalloc(sizeof(FATFS));
+	configASSERT(fs);
+	if (f_mount(fs,"", 0) != FR_OK) {
+		debug_print("f_mount failed\r\n");
+	}
 	
 	/* initlizie file and stream buffer */
 	sbuff = sbuff_alloc(pqlist->sdcard);
 	configASSERT(sbuff);
+	
+	/* check remained heap */
+	debug_print("free heap: %zu\r\n",xPortGetFreeHeapSize());
 	
 	result = f_opendir(&dir, (char *)"/");
 	configASSERT(result == FR_OK);
@@ -155,7 +155,6 @@ void vtask_controller(void* vparameters)
 		stop_playing(sbuff, pqlist);
 	} /* for(;;) */
 }
-
 
 /**
  * \brief blink led 	

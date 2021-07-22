@@ -204,6 +204,7 @@ void vtask_vs10xx(void* vparameters)
 	lwrb_t*										lwrb;
 	struct stream_buff*				sbuff;
 	BaseType_t 								xstatus;
+	TickType_t								waits = portMAX_DELAY;
 	static BaseType_t					vs_status;
 	void*											buff;
 	size_t										len;
@@ -212,8 +213,7 @@ void vtask_vs10xx(void* vparameters)
 	
 	/* main loop */
 	for(;;) {
-		/* don't wait for command */
-		xstatus = xQueueReceive(pqlist->vs10xx, &vs10xx_cmd, 0);
+		xstatus = xQueueReceive(pqlist->vs10xx, &vs10xx_cmd, waits);
 		if (xstatus == pdPASS) {
 		//debug_print("cmd: %02x, arg: %p\r\n", vs10xx_cmd.cmd 
 		//																		,	(void *) vs10xx_cmd.arg);
@@ -221,6 +221,7 @@ void vtask_vs10xx(void* vparameters)
 			switch (vs10xx_cmd.cmd) {
 				case CMD_VS10XX_PLAY:
 					lwrb = &sbuff->lwrb;
+					waits = 0;			/* don't wait for command after playing is started*/
 					vs_status = 0x01;
 				break;
 				
@@ -231,6 +232,7 @@ void vtask_vs10xx(void* vparameters)
 				
 				case CMD_VS10XX_STOP:
 					vs_status = 0x00;
+					waits = portMAX_DELAY;
 				//ToDo: cancel/end current play (to avoid glitch)
 				break;
 				
@@ -332,7 +334,7 @@ void vtask_hmi(void* vparameters)
 	struct controller_qlist* 	pqlist 	= vparameters;	/* command queue */
 	char 											banner[40];
 	char*											message;
-	uint32_t									index;
+	uint32_t									index = 0;
 	BaseType_t 								xstatus;
 	struct mp3p_cmd 					hmi_cmd;
 	extern GUI_CONST_STORAGE 	GUI_BITMAP bmowl;

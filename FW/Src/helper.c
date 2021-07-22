@@ -115,7 +115,7 @@ void start_playing(	struct stream_buff* sbuff,
 	xQueueSend(qlist->blink, &qcmd, 0);
 	
 	/* set file name in HMI */
-	qcmd.cmd = CMD_HMI_SHOW_FILE_NAEM;
+	qcmd.cmd = CMD_HMI_SHOW_FILE_NAME;
 	qcmd.arg = (uintptr_t) file;
 	xQueueSend(qlist->hmi, &qcmd, 0);
 	

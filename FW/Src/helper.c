@@ -251,6 +251,31 @@ void vsmp3_create_tasks(struct controller_qlist* qlist)
 }
 
 /**
+ * in case of change in system state
+ */
+void maintenance_mode(const char * message, struct controller_qlist* qlist)
+{
+	struct mp3p_cmd						qcmd;
+	
+	/* message on LCD */
+	qcmd.cmd = CMD_HMI_SHOW_FILE_NAME;
+	qcmd.arg = (uintptr_t) message;
+	xQueueSend(qlist->hmi, &qcmd, 0);
+	
+	/* blink fast while  maintenance*/
+	qcmd.cmd = CMD_LED_BLINK_SET;
+	qcmd.arg = 200;
+	xQueueSend(qlist->blink, &qcmd, 0);
+	
+	debug_print("%s\r\n", message);
+	
+	/* infinit loop*/
+	for(;;) {
+		vTaskDelay(pdMS_TO_TICKS(1000));
+	} /* for(;;) */
+}
+
+/**
  *  Run time stack overflow checking is performed if
  *  configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
  *  called if a stack overflow is detected.

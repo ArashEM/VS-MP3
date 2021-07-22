@@ -110,6 +110,18 @@ void vtask_controller(void* vparameters)
 	DIR 											dir;
 	static FILINFO 						fno;				/* valid pointer to fno.fname */			
 	
+	/* check for sd-card presence */
+	if(HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin) != GPIO_PIN_RESET) {
+		maintenance_mode("No SD Card",pqlist);
+	}
+	
+	/* check for KEY4 pressed state */
+	if(HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin)  == GPIO_PIN_RESET) {
+		/* init code for USB_DEVICE */
+		MX_USB_DEVICE_Init();
+		maintenance_mode("USB MSD",pqlist);
+	}
+	
 	/* mount SD card */
 	fs = (FATFS *)pvPortMalloc(sizeof(FATFS));
 	configASSERT(fs);

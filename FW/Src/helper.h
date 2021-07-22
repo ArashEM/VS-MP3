@@ -32,6 +32,7 @@ void set_volume(struct controller_qlist* qlist, const uint8_t vol);
 struct controller_qlist* vsmp3_create_queues(void);
 void vsmp3_create_tasks(struct controller_qlist* qlist);
 
+void maintenance_mode(const char * message, struct controller_qlist* qlist);
 /* macro */
 #define is_eof(sbuff) f_eof(&(sbuff)->file)
 

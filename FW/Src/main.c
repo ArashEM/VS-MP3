@@ -41,6 +41,7 @@
 #include "ili9340.h"
 #include "WM.h"
 #include "mp3_player.h"
+#include "debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -213,12 +214,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
-  */
+  */		
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	debug_print("error-handler:\r\n");
   /* USER CODE END Error_Handler_Debug */
 }
 

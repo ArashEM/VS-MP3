@@ -27,9 +27,10 @@ extern SemaphoreHandle_t				dreq_sem,
 extern struct controller_qlist*	qlist;						/* queue list for all tasks */
 
 extern TimerHandle_t						bl_tim;						/* backlight timer handle */
+extern QueueHandle_t						hw_queue;					/* event and commands from hw */
 
 #if (configUSE_TRACE_FACILITY == 1)
-extern traceHandle 						dreq_handle, 
+extern traceHandle 						exti0_handle, 
 															spi_dma_handle,
 															sdio_dma_handle;
 #endif
@@ -43,9 +44,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	portBASE_TYPE 	taskWoken = pdFALSE;
 	static uint8_t	vol = INIT_VOLUME;
+	uint32_t				event;
 	
 #if (configUSE_TRACE_FACILITY == 1)
-	vTraceStoreISRBegin(dreq_handle);
+	vTraceStoreISRBegin(exti0_handle);
 #endif
 	
 	switch(GPIO_Pin) {
@@ -78,10 +80,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			break; 
 		
 		case KEY3_Pin:
+			event = HW_KEY3_PRESSED;
 			/* power of Backlight */
 			HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_SET);
 			/* reset backlight timer */
-			xTimerResetFromISR(bl_tim,&taskWoken);
+			xTimerResetFromISR(bl_tim, &taskWoken);
+		  xQueueSendFromISR(hw_queue, &event, &taskWoken);
 			portEND_SWITCHING_ISR(taskWoken);
 		break;
 		

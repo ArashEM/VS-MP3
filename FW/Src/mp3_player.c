@@ -29,10 +29,12 @@ SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
 													spi_tx_dma_sem;		/* spi1_tx DMA compelete */
 TimerHandle_t							bl_tim;						/* backlight timer handle */
 struct controller_qlist*	qlist;						/* queue list for all tasks */
+QueueHandle_t							hw_queue;					/* event and commands from hw */
+
 
 #if (configUSE_TRACE_FACILITY == 1)
 traceString 							sd_chn, vs_chn;	
-traceHandle 							dreq_handle, spi_dma_handle;
+traceHandle 							exti0_handle, spi_dma_handle;
 #endif
 
 /**
@@ -45,6 +47,10 @@ void vsmp3_init(void *vparameters)
 	
 	/* create tasks */
 	vsmp3_create_tasks(qlist);
+	
+	/* create queue for HW events */
+	hw_queue = xQueueCreate(5, sizeof(int));
+	configASSERT(hw_queue);
 	
 	/* create backlight timer */
 	bl_tim = xTimerCreate("backlight", 
@@ -75,6 +81,7 @@ void vsmp3_init(void *vparameters)
 	vTraceSetQueueName(qlist->vs10xx, "q-vs10xx");
 	vTraceSetQueueName(qlist->sdcard, "q-sdcard");
 	vTraceSetQueueName(qlist->hmi, "q-hmi");
+	vTraceSetQueueName(hw_queue, "q-hw");
 	
 	/* set semaphore name */
 	vTraceSetSemaphoreName(dreq_sem, "dreq-sem");
@@ -85,7 +92,7 @@ void vsmp3_init(void *vparameters)
 	vs_chn = xTraceRegisterString("vs10xx");
 	
 	/*set ISR name */
-	dreq_handle = xTraceSetISRProperties("dreq-isr",
+	exti0_handle = xTraceSetISRProperties("EXTI0-isr",
 																				NVIC_GetPriority(DREQ_EXTI_IRQn));
 	spi_dma_handle = xTraceSetISRProperties("spi-dma-isr", 
 																		NVIC_GetPriority(DMA1_Channel3_IRQn));
@@ -108,7 +115,9 @@ void vtask_controller(void* vparameters)
 	FATFS* 										fs;  				/* FS object for SD card logical drive */
 	FRESULT										result;
 	DIR 											dir;
-	static FILINFO 						fno;				/* valid pointer to fno.fname */			
+	static FILINFO 						fno;				/* valid pointer to fno.fname */
+	BaseType_t 								xstatus;	
+	uint32_t									hw_msg;
 	
 	/* check for sd-card presence */
 	if(HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin) != GPIO_PIN_RESET) {
@@ -162,7 +171,12 @@ void vtask_controller(void* vparameters)
 		// ToDo: Check file name ends with '.mp3'
 		start_playing(sbuff, pqlist, fno.fname);
 		while(!is_eof(sbuff)) {
-			vTaskDelay(pdMS_TO_TICKS(500));
+			xstatus = xQueueReceive(hw_queue, &hw_msg, pdMS_TO_TICKS(500));  
+			if (xstatus == pdPASS) {
+				if(hw_msg == HW_KEY3_PRESSED) {
+					break;		/* get out of while() loop */
+				}
+			}
 		}
 		stop_playing(sbuff, pqlist);
 	} /* for(;;) */
@@ -372,7 +386,7 @@ void vtask_hmi(void* vparameters)
 		xstatus = xQueueReceive(pqlist->hmi, &hmi_cmd, pdMS_TO_TICKS(1000));
 		if (xstatus == pdPASS) {
 			switch(hmi_cmd.cmd) {
-				case CMD_HMI_SHOW_FILE_NAME:
+				case CMD_HMI_SET_MSG:
 					message = (char *)hmi_cmd.arg;
 					GUI_DispStringAtCEOL(message, 160, 220);
 					index=0;

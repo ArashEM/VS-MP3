@@ -115,7 +115,7 @@ void start_playing(	struct stream_buff* sbuff,
 	xQueueSend(qlist->blink, &qcmd, 0);
 	
 	/* set file name in HMI */
-	qcmd.cmd = CMD_HMI_SHOW_FILE_NAME;
+	qcmd.cmd = CMD_HMI_SET_MSG;
 	qcmd.arg = (uintptr_t) file;
 	xQueueSend(qlist->hmi, &qcmd, 0);
 	
@@ -258,7 +258,7 @@ void maintenance_mode(const char * message, struct controller_qlist* qlist)
 	struct mp3p_cmd						qcmd;
 	
 	/* message on LCD */
-	qcmd.cmd = CMD_HMI_SHOW_FILE_NAME;
+	qcmd.cmd = CMD_HMI_SET_MSG;
 	qcmd.arg = (uintptr_t) message;
 	xQueueSend(qlist->hmi, &qcmd, 0);
 	

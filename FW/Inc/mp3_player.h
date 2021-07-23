@@ -69,7 +69,16 @@ enum {
 	CMD_SDCARD_STOP_READ,
 	
 	/* hmi related commands */
-	CMD_HMI_SHOW_FILE_NAME,			/* arg is char * which point to file name */
+	CMD_HMI_SET_MSG,						/* arg is char * which point to file name */
+};
+
+/* HW queue values */
+enum {
+	/* Keys */
+	HW_KEY1_PRESSED,
+	HW_KEY2_PRESSED,
+	HW_KEY3_PRESSED,
+	HW_KEY4_PRESSED,
 };
 
 /* tasks priorities */

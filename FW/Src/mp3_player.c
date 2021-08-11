@@ -27,7 +27,8 @@
 /* Global variable */
 SemaphoreHandle_t					dreq_sem,					/* vs10xx dreq IRQ */
 													spi_tx_dma_sem;		/* spi1_tx DMA compelete */
-TimerHandle_t							bl_tim;						/* backlight timer handle */
+TimerHandle_t							bl_tim,						/* backlight timer handle */
+													gpio_tim;					/* gpio debouncer */
 struct controller_qlist*	qlist;						/* queue list for all tasks */
 QueueHandle_t							hw_queue;					/* event and commands from hw */
 
@@ -49,7 +50,7 @@ void vsmp3_init(void *vparameters)
 	vsmp3_create_tasks(qlist);
 	
 	/* create queue for HW events */
-	hw_queue = xQueueCreate(5, sizeof(int));
+	hw_queue = xQueueCreate(1, sizeof(int));
 	configASSERT(hw_queue);
 	
 	/* create backlight timer */
@@ -60,6 +61,14 @@ void vsmp3_init(void *vparameters)
 												vtimer_backlight);
 	configASSERT(bl_tim);
 	xTimerStart(bl_tim, portMAX_DELAY);
+	
+	/* create gpio debouncer timer*/
+	gpio_tim = xTimerCreate("gpio",
+													pdMS_TO_TICKS(150),
+													pdFALSE,
+													0,
+													vtimer_debounce);
+	configASSERT(gpio_tim);
 	
 	/* debug */
 	debug_print("task creation done\r\n");
@@ -409,5 +418,36 @@ void vtimer_backlight(TimerHandle_t xTimer)
 {
 	/* when expire, turn off backlight */
 	HAL_GPIO_WritePin(BL_PWM_GPIO_Port,BL_PWM_Pin, GPIO_PIN_RESET);
+}
+
+/**
+ * \brief: GPIO debounce timer  
+ */
+void vtimer_debounce(TimerHandle_t xTimer)
+{
+	uint32_t	gpio_index;
+	gpio_index = (uint32_t) pvTimerGetTimerID(xTimer);
+	switch(gpio_index) {
+		case KEY1_Pin:
+			if(HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET) {
+				debug_print("KEY%d pressed\r\n",gpio_index);
+			}
+		break;
+		
+		case KEY2_Pin:
+			if(HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == GPIO_PIN_RESET) {
+				debug_print("KEY%d pressed\r\n",gpio_index);
+			}
+		break;
+		
+		case KEY3_Pin:
+			if(HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == GPIO_PIN_RESET) {
+				debug_print("KEY%d pressed\r\n",gpio_index);
+			}
+		break;
+		
+		default:
+		break;
+	} /* switch(gpio_index) */
 }
 /* end of file */

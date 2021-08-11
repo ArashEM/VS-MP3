@@ -26,7 +26,8 @@ extern SemaphoreHandle_t				dreq_sem,
 																sdio_rx_dma_sem;
 extern struct controller_qlist*	qlist;						/* queue list for all tasks */
 
-extern TimerHandle_t						bl_tim;						/* backlight timer handle */
+extern TimerHandle_t						bl_tim,						/* backlight timer handle */
+																gpio_tim;					/* gpio debouncer */
 extern QueueHandle_t						hw_queue;					/* event and commands from hw */
 
 #if (configUSE_TRACE_FACILITY == 1)
@@ -44,7 +45,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	portBASE_TYPE 	taskWoken = pdFALSE;
 	static uint8_t	vol = INIT_VOLUME;
-	uint32_t				event;
+	static uint32_t				event;
 	
 #if (configUSE_TRACE_FACILITY == 1)
 	vTraceStoreISRBegin(exti0_handle);

@@ -26,6 +26,7 @@ void vtask_blink(void* vparameters);
 void vtask_hmi(void* vparameters);
 
 void vtimer_backlight(TimerHandle_t xTimer);
+void vtimer_debounce(TimerHandle_t xTimer);
 
 /**
  * \brief mp3 player command 
